@@ -1,10 +1,12 @@
 import { Button } from "@mui/material";
+import Sidebar from "./pages/Sidebar";
 
 function App() {
   return (
     <>
       <div className="flex flex-col">
-        <Button variant="text" color="error">
+        <Sidebar />
+        {/* <Button variant="text" color="error">
           Text
         </Button>
         <Button variant="contained">Contained</Button>
@@ -14,7 +16,7 @@ function App() {
           consequatur aliquam quod ab in, voluptates possimus minus libero
           labore ex ducimus excepturi error perspiciatis! Vero eos dicta aperiam
           modi unde?
-        </p>
+        </p> */}
       </div>
     </>
   );
