@@ -1,22 +1,45 @@
-import { Button } from "@mui/material";
+import React, { useState } from "react";
+import { db } from "./firebase";
+import { collection, addDoc, getDocs } from "firebase/firestore";
 
 function App() {
+  const [name, setName] = useState("");
+  const [alamat, setAlamat] = useState("");
+  const [umur, setUmur] = useState(Number);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const docRef = await addDoc(collection(db, "users"), {
+        nama: name,
+        alamat: alamat,
+        umur: umur,
+      });
+      console.log("Data added successfully!");
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
-    <>
-      <div className="flex flex-col">
-        <Button variant="text" color="error">
-          Text
-        </Button>
-        <Button variant="contained">Contained</Button>
-        <Button variant="outlined">Outlined</Button>
-        <p className="text-red-500">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempore,
-          consequatur aliquam quod ab in, voluptates possimus minus libero
-          labore ex ducimus excepturi error perspiciatis! Vero eos dicta aperiam
-          modi unde?
-        </p>
-      </div>
-    </>
+    <form onSubmit={handleSubmit}>
+      <input
+        type="text"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      />
+      <input
+        type="text"
+        value={alamat}
+        onChange={(e) => setAlamat(e.target.value)}
+      />
+      <input
+        type="number"
+        value={umur}
+        onChange={(e) => setUmur(e.target.value)}
+      />
+      <button type="submit">Add Data</button>
+    </form>
   );
 }
 
