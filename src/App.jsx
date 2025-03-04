@@ -1,24 +1,19 @@
-import { Button } from "@mui/material";
-import Sidebar from "./pages/Sidebar";
+import Sidebar from "./components/Sidebar";
+import Dashboard from "./pages/Dashboard";
 
 function App() {
   return (
-    <>
-      <div className="flex flex-col">
+    <div className="flex h-screen">
+      {/* Sidebar - Fixed Width */}
+      <div className="w-54">
         <Sidebar />
-        {/* <Button variant="text" color="error">
-          Text
-        </Button>
-        <Button variant="contained">Contained</Button>
-        <Button variant="outlined">Outlined</Button>
-        <p className="text-red-500">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempore,
-          consequatur aliquam quod ab in, voluptates possimus minus libero
-          labore ex ducimus excepturi error perspiciatis! Vero eos dicta aperiam
-          modi unde?
-        </p> */}
       </div>
-    </>
+
+      {/* Main Content - Takes Remaining Space */}
+      <div className="flex-1 p-4" style={{ background: "#ebebeb" }}>
+        <Dashboard />
+      </div>
+    </div>
   );
 }
 

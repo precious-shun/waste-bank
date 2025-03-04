@@ -33,23 +33,34 @@ const Sidebar = () => {
           </Toolbar>
           <Divider sx={{ backgroundColor: "#4E7972" }} />
           <List sx={{ backgroundColor: "#2C514B", height: 1000 }}>
-            {["Dashboard", "Users", "Waste Products", "Transactions"].map((text) => (
-              <ListItem key={text} disablePadding>
-                <ListItemButton>
-                  <ListItemIcon>
-                    <SpaceDashboardIcon sx={{ color: "#ffffff" }} />
-                  </ListItemIcon>
-                  <ListItemText sx={{ color: "white" }} primary={text} />
-                </ListItemButton>
-              </ListItem>
-            ))}
+            {["Dashboard", "Users", "Waste Products", "Transactions"].map(
+              (text) => (
+                <ListItem key={text} disablePadding>
+                  <ListItemButton>
+                    <ListItemIcon>
+                      <SpaceDashboardIcon sx={{ color: "#ffffff" }} />
+                    </ListItemIcon>
+                    <ListItemText sx={{ color: "white" }} primary={text} />
+                  </ListItemButton>
+                </ListItem>
+              )
+            )}
           </List>
           <Divider sx={{ backgroundColor: "#4E7972" }} />
           <List sx={{ marginTop: "auto", backgroundColor: "#2C514B" }}>
             {["Arief Kamaluddin"].map((text) => (
               <ListItem key={text} disablePadding>
                 <ListItemButton>
-                  <Avatar sx={{ height: 32, width: 32, marginRight: 2, marginLeft: 1 }} alt="Remy Sharp" src="/static/images/avatar/1.jpg" />
+                  <Avatar
+                    sx={{
+                      height: 32,
+                      width: 32,
+                      marginRight: 2,
+                      marginLeft: 1,
+                    }}
+                    alt="Remy Sharp"
+                    src="/static/images/avatar/1.jpg"
+                  />
                   <ListItemText sx={{ color: "white" }} primary={text} />
                 </ListItemButton>
               </ListItem>
