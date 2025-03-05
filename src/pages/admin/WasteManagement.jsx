@@ -16,6 +16,7 @@ import {
   getDocs,
   addDoc,
   updateDoc,
+  deleteDoc,
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
 
@@ -138,6 +139,29 @@ const WasteManagement = () => {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
+  const [deleteTarget, setDeleteTarget] = useState(null);
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+
+    try {
+      await deleteDoc(doc(db, "waste-products", deleteTarget.id));
+
+      setWastes((prevWastes) =>
+        prevWastes.filter((item) => item.id !== deleteTarget.id)
+      );
+
+      setDeleteTarget(null);
+      confirmClose();
+    } catch (error) {
+      console.error("Error deleting document: ", error);
+    }
+  };
+
+  const [confirmModal, setConfirmModal] = useState(false);
+  const confirmOpen = () => setConfirmModal(true);
+  const confirmClose = () => setConfirmModal(false);
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -238,6 +262,22 @@ const WasteManagement = () => {
                         >
                           Edit
                         </Button>
+                        <Button
+                          onClick={() => {
+                            setDeleteTarget(waste);
+                            confirmOpen();
+                          }}
+                          sx={{
+                            backgroundColor: "#4E7972",
+                            borderRadius: 100,
+                            width: 80,
+                            textTransform: "none",
+                          }}
+                          startIcon={<UserPlusIcon className="size-5" />}
+                          variant="contained"
+                        >
+                          Delete
+                        </Button>
                       </TableCell>
 
                       {/* <TableCell>{waste.quantity}</TableCell>
@@ -251,6 +291,53 @@ const WasteManagement = () => {
           </TableContainer>
         </div>
       </div>
+
+      <Modal
+        open={confirmModal}
+        onClose={confirmClose}
+        aria-labelledby="delete-confirmation-title"
+        aria-describedby="delete-confirmation-description"
+      >
+        <Box sx={style}>
+          <Typography
+            id="delete-confirmation-title"
+            variant="h6"
+            component="h2"
+          >
+            Are you sure you want to delete this data?
+          </Typography>
+          <Button
+            variant="contained"
+            sx={{ mt: 2, mr: 2, backgroundColor: "#D32F2F" }}
+            onClick={handleDelete}
+          >
+            Yes
+          </Button>
+          <Button variant="contained" sx={{ mt: 2 }} onClick={confirmClose}>
+            No
+          </Button>
+        </Box>
+      </Modal>
+
+      <Modal
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={style}>
+          <Typography id="modal-modal-title" variant="h6" component="h2">
+            Are you sure you want to delete this data?
+          </Typography>
+          <Button variant="contained" sx={{ mt: 2 }}>
+            Yes
+          </Button>
+          <Button variant="contained" sx={{ mt: 2 }}>
+            No
+          </Button>
+        </Box>
+      </Modal>
+
       <Modal
         open={open}
         onClose={handleClose}
