@@ -41,13 +41,13 @@ const WasteManagement = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleAddWaste = async () => {
-    if (!waste || !unit || !price || !quantity) return; // Prevent adding empty data
+    if (!waste || !unit || !price) return; // Prevent adding empty data
 
     const newWaste = {
       waste,
       unit,
       price: parseInt(price),
-      quantity: parseInt(quantity),
+      // quantity: parseInt(quantity),
     };
 
     try {
@@ -58,7 +58,7 @@ const WasteManagement = () => {
       setWaste("");
       setUnit("");
       setPrice("");
-      setQuantity("");
+      // setQuantity("");
 
       handleClose();
     } catch (error) {
@@ -71,7 +71,7 @@ const WasteManagement = () => {
     setWaste(wasteItem.waste);
     setUnit(wasteItem.unit);
     setPrice(wasteItem.price);
-    setQuantity(wasteItem.quantity);
+    // setQuantity(wasteItem.quantity);
     handleOpen();
   };
 
@@ -84,7 +84,7 @@ const WasteManagement = () => {
         waste,
         unit,
         price: parseInt(price),
-        quantity: parseInt(quantity),
+        // quantity: parseInt(quantity),
       });
 
       setWastes((prevWastes) =>
@@ -95,7 +95,7 @@ const WasteManagement = () => {
                 waste,
                 unit,
                 price: parseInt(price),
-                quantity: parseInt(quantity),
+                // quantity: parseInt(quantity),
               }
             : item
         )
@@ -105,7 +105,7 @@ const WasteManagement = () => {
       setWaste("");
       setUnit("");
       setPrice("");
-      setQuantity("");
+      // setQuantity("");
       handleClose();
     } catch (error) {
       console.error("Error updating document: ", error);
