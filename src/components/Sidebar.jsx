@@ -8,15 +8,32 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import { ArchiveBoxIcon, DocumentTextIcon, Squares2X2Icon, UserGroupIcon } from "@heroicons/react/24/solid";
+import {
+  ArchiveBoxIcon,
+  DocumentTextIcon,
+  Squares2X2Icon,
+  UserGroupIcon,
+} from "@heroicons/react/24/solid";
 import { Avatar } from "@mui/material";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const Sidebar = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   return (
     <>
       <Box sx={{ display: "flex" }}>
         <CssBaseline />
-        <Drawer sx={{ width: 240, flexShrink: 0, "& .MuiDrawer-paper": { width: 240, boxSizing: "border-box" } }} variant="permanent" anchor="left">
+        <Drawer
+          sx={{
+            width: 240,
+            flexShrink: 0,
+            "& .MuiDrawer-paper": { width: 240, boxSizing: "border-box" },
+          }}
+          variant="permanent"
+          anchor="left"
+        >
           <Toolbar sx={{ backgroundColor: "#2C514B" }}>
             <div className="text-2xl font-bold text-white">Logo</div>
           </Toolbar>
@@ -31,7 +48,16 @@ const Sidebar = () => {
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
-              <ListItemButton sx={{ "&.Mui-selected": { backgroundColor: "#335F58", ":hover": { backgroundColor: "#335F58" } } }} selected>
+              <ListItemButton
+                selected={location.pathname === "/"}
+                onClick={() => navigate("/")}
+                sx={{
+                  "&.Mui-selected": {
+                    backgroundColor: "#335F58",
+                    ":hover": { backgroundColor: "#335F58" },
+                  },
+                }}
+              >
                 <ListItemIcon>
                   <Squares2X2Icon className="size-6 ms-2 text-white" />
                 </ListItemIcon>
@@ -39,11 +65,23 @@ const Sidebar = () => {
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
-              <ListItemButton>
+              <ListItemButton
+                selected={location.pathname === "/waste"}
+                onClick={() => navigate("/waste")}
+                sx={{
+                  "&.Mui-selected": {
+                    backgroundColor: "#335F58",
+                    ":hover": { backgroundColor: "#335F58" },
+                  },
+                }}
+              >
                 <ListItemIcon>
                   <ArchiveBoxIcon className="size-6 ms-2 text-white" />
                 </ListItemIcon>
-                <ListItemText sx={{ color: "white" }} primary="Waste Products" />
+                <ListItemText
+                  sx={{ color: "white" }}
+                  primary="Waste Products"
+                />
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
@@ -59,8 +97,15 @@ const Sidebar = () => {
           <List sx={{ marginTop: "auto", backgroundColor: "#2C514B" }}>
             <ListItem disablePadding>
               <ListItemButton>
-                <Avatar sx={{ height: 32, width: 32, marginRight: 2, marginLeft: 1 }} alt="Remy Sharp" src="/static/images/avatar/1.jpg" />
-                <ListItemText sx={{ color: "white" }} primary="Arief Kamaluddin" />
+                <Avatar
+                  sx={{ height: 32, width: 32, marginRight: 2, marginLeft: 1 }}
+                  alt="Remy Sharp"
+                  src="/static/images/avatar/1.jpg"
+                />
+                <ListItemText
+                  sx={{ color: "white" }}
+                  primary="Arief Kamaluddin"
+                />
               </ListItemButton>
             </ListItem>
           </List>
