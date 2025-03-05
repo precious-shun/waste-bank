@@ -8,6 +8,7 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
+import Logo from "../assets/logo.svg";
 import { Avatar } from "@mui/material";
 import { ArchiveBoxIcon, DocumentTextIcon, Squares2X2Icon, UserGroupIcon } from "@heroicons/react/24/solid";
 
@@ -30,8 +31,8 @@ const Sidebar = () => {
       <Box sx={{ display: "flex" }}>
         <CssBaseline />
         <Drawer sx={{ width: 240, flexShrink: 0, "& .MuiDrawer-paper": { width: 240, boxSizing: "border-box" } }} variant="permanent" anchor="left">
-          <Toolbar sx={{ backgroundColor: sidebarColor.darkGreen }}>
-            <div className="text-2xl font-bold text-white">Logo</div>
+          <Toolbar className="flex justify-center" sx={{ backgroundColor: sidebarColor.darkGreen }}>
+            <img src={Logo} className="h-28" alt="Logo" />
           </Toolbar>
           <Divider sx={{ backgroundColor: sidebarColor.green }} />
           <List sx={{ backgroundColor: sidebarColor.darkGreen, height: "100%" }}>
