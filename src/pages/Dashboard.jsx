@@ -1,3 +1,9 @@
+//db management
+import React, { useEffect, useState } from "react";
+import { db } from "../firebase";
+import { collection, getDocs } from "firebase/firestore";
+
+//component management
 import { Box, Typography, Grid, Paper, colors } from "@mui/material";
 import {
   LineChart,
@@ -9,6 +15,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
+//example
 const data = [
   { month: "Jan", revenue: 4000 },
   { month: "Feb", revenue: 3000 },
@@ -19,17 +26,31 @@ const data = [
 ];
 
 const Dashboard = () => {
+  const [totalUsers, setTotalUsers] = useState(0);
+
+  useEffect(() => {
+    const fetchTotalUsers = async () => {
+      try {
+        const usersCollection = collection(db, "users");
+        const usersSnapshot = await getDocs(usersCollection);
+        setTotalUsers(usersSnapshot.size); // Number of documents in the collection
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      }
+    };
+    fetchTotalUsers();
+  }, []);
+
   return (
     <Box sx={{ flexGrow: 1, p: 1, ml: "0px", mt: "0px" }}>
       <Typography variant="h4" gutterBottom sx={{ color: " #2c514b" }}>
         Dashboard
       </Typography>
-
       {/* Statistics Cards */}
       <Grid container spacing={3}>
         {[
-          { title: "Total Users", value: "1,200" },
-          { title: "Waste Accumulated", value: "350" },
+          { title: "Total Users", value: totalUsers },
+          { title: "Outcome", value: "Rp250.000,00" },
           { title: "Revenue", value: "Rp500.000,00" },
         ].map((stat, index) => (
           <Grid item xs={12} sm={6} md={4} key={index}>
@@ -47,6 +68,7 @@ const Dashboard = () => {
         ))}
       </Grid>
 
+      {/* example */}
       <Paper sx={{ p: 3, mt: 3, backgroundColor: "#c2d1c8" }}>
         <Typography variant="h6" gutterBottom sx={{ color: " #2c514b" }}>
           Monthly Revenue

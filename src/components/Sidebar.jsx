@@ -48,7 +48,7 @@ const Sidebar = () => {
           </List>
           <Divider sx={{ backgroundColor: "#4E7972" }} />
           <List sx={{ marginTop: "auto", backgroundColor: "#2C514B" }}>
-            {["Arief Kamaluddin"].map((text) => (
+            {["Sunan Alit"].map((text) => (
               <ListItem key={text} disablePadding>
                 <ListItemButton>
                   <Avatar
@@ -58,7 +58,7 @@ const Sidebar = () => {
                       marginRight: 2,
                       marginLeft: 1,
                     }}
-                    alt="Remy Sharp"
+                    alt="Sunan Alit"
                     src="/static/images/avatar/1.jpg"
                   />
                   <ListItemText sx={{ color: "white" }} primary={text} />

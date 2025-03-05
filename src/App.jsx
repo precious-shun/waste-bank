@@ -5,10 +5,6 @@ import { db } from "./firebase";
 import { collection, addDoc, getDocs } from "firebase/firestore";
 
 function App() {
-  const [name, setName] = useState("");
-  const [alamat, setAlamat] = useState("");
-  const [umur, setUmur] = useState(Number);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
