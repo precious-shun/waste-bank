@@ -1,10 +1,11 @@
 import UsersManagement from "./pages/admin/UsersManagement";
+import WasteManagement from "./pages/admin/WasteManagement";
 
 function App() {
   return (
     <>
-      
-      <UsersManagement />
+      {/* <UsersManagement /> */}
+      <WasteManagement />
     </>
   );
 }
