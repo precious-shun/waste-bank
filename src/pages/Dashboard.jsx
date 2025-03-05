@@ -9,6 +9,9 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
+import { useEffect, useState } from "react";
+//firebase
+
 const data = [
   { month: "Jan", revenue: 4000 },
   { month: "Feb", revenue: 3000 },
