@@ -35,8 +35,10 @@ const WasteManagement = () => {
   const [waste, setWaste] = useState("");
   const [unit, setUnit] = useState("");
   const [price, setPrice] = useState("");
-  const [quantity, setQuantity] = useState("");
+  // const [quantity, setQuantity] = useState("");
   const [editingWaste, setEditingWaste] = useState(null);
+  //pencarian
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleAddWaste = async () => {
     if (!waste || !unit || !price || !quantity) return; // Prevent adding empty data
@@ -111,6 +113,10 @@ const WasteManagement = () => {
   };
 
   const [wastes, setWastes] = useState([]);
+  //filtered search
+  const filteredWastes = wastes.filter((waste) =>
+    waste.waste.toLowerCase().includes(searchQuery)
+  );
 
   const fetchData = async () => {
     await getDocs(collection(db, "waste-products")).then((querySnapshot) => {
@@ -165,6 +171,8 @@ const WasteManagement = () => {
               <TextField
                 fullWidth
                 placeholder="Search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value.toLowerCase())}
                 slotProps={{
                   input: {
                     startAdornment: (
@@ -210,7 +218,7 @@ const WasteManagement = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {wastes.map((waste, index) => {
+                {filteredWastes.map((waste, index) => {
                   return (
                     <TableRow key={index}>
                       <TableCell>{waste.waste}</TableCell>

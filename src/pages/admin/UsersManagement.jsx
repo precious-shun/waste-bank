@@ -27,10 +27,18 @@ const style = {
 
 const UsersManagement = () => {
   const [users, setUsers] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredUsers = users.filter((user) =>
+    user.fullname?.toLowerCase().includes(searchQuery)
+  );
 
   const fetchData = async () => {
     await getDocs(collection(db, "users")).then((querySnapshot) => {
-      const data = querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+      const data = querySnapshot.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      }));
       setUsers(data);
     });
   };
@@ -51,20 +59,55 @@ const UsersManagement = () => {
 
   return (
     <>
-      <div style={{ backgroundColor: "#EBEBEB" }} className="px-8 flex h-screen">
+      <div
+        style={{ backgroundColor: "#EBEBEB" }}
+        className="px-8 flex h-screen"
+      >
         <Sidebar />
         <div className="w-full py-4 h-screen">
           <div className="text-2xl font-bold mb-4 text-green-900">Users</div>
           <div className="mb-6 flex flex-row gap-4">
-            <Button onClick={handleOpen} sx={{ backgroundColor: "#4E7972", borderRadius: 100, width: 160, textTransform: "none" }} startIcon={<UserPlusIcon className="size-5" />} variant="contained">
+            <Button
+              onClick={handleOpen}
+              sx={{
+                backgroundColor: "#4E7972",
+                borderRadius: 100,
+                width: 160,
+                textTransform: "none",
+              }}
+              startIcon={<UserPlusIcon className="size-5" />}
+              variant="contained"
+            >
               Add User
             </Button>
             <Paper elevation="0" sx={{ borderRadius: 100, width: "100%" }}>
-              <TextField fullWidth placeholder="Search" slotProps={{ input: { startAdornment: <MagnifyingGlassIcon className="size-5 mr-2" /> } }} sx={{ "& fieldset": { borderRadius: 100 } }} size="small" />
+              <TextField
+                fullWidth
+                placeholder="Search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value.toLowerCase())}
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <MagnifyingGlassIcon className="size-5 mr-2" />
+                    ),
+                  },
+                }}
+                sx={{ "& fieldset": { borderRadius: 100 } }}
+                size="small"
+              />
             </Paper>
           </div>
-          <TableContainer elevation="0" sx={{ backgroundColor: "#C2D1C8", height: "80%" }} component={Paper}>
-            <Table stickyHeader sx={{ minWidth: 650 }} aria-label="simple table">
+          <TableContainer
+            elevation="0"
+            sx={{ backgroundColor: "#C2D1C8", height: "80%" }}
+            component={Paper}
+          >
+            <Table
+              stickyHeader
+              sx={{ minWidth: 650 }}
+              aria-label="simple table"
+            >
               <TableHead>
                 <TableRow>
                   <TableCell sx={{ backgroundColor: "#C2D1C8" }}>
@@ -88,7 +131,7 @@ const UsersManagement = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {users.map((user, index) => {
+                {filteredUsers.map((user, index) => {
                   return (
                     <TableRow key={index}>
                       <TableCell>{user.fullname}</TableCell>
@@ -105,7 +148,12 @@ const UsersManagement = () => {
           </TableContainer>
         </div>
       </div>
-      <Modal open={open} onClose={handleClose} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
+      <Modal
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
         <Box sx={style}>
           <Typography id="modal-modal-title" variant="h6" component="h2">
             Add User
