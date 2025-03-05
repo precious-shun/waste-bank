@@ -10,7 +10,13 @@ import { UserPlusIcon, MagnifyingGlassIcon } from "@heroicons/react/24/solid";
 import { Box, Button, Modal, TextField, Typography } from "@mui/material";
 
 import { db } from "../../firebase";
-import { collection, getDocs } from "firebase/firestore";
+import {
+  doc,
+  collection,
+  getDocs,
+  addDoc,
+  updateDoc,
+} from "firebase/firestore";
 import { useEffect, useState } from "react";
 
 const style = {
@@ -26,6 +32,84 @@ const style = {
 };
 
 const WasteManagement = () => {
+  const [waste, setWaste] = useState("");
+  const [unit, setUnit] = useState("");
+  const [price, setPrice] = useState("");
+  const [quantity, setQuantity] = useState("");
+  const [editingWaste, setEditingWaste] = useState(null);
+
+  const handleAddWaste = async () => {
+    if (!waste || !unit || !price || !quantity) return; // Prevent adding empty data
+
+    const newWaste = {
+      waste,
+      unit,
+      price: parseInt(price),
+      quantity: parseInt(quantity),
+    };
+
+    try {
+      await addDoc(collection(db, "waste-products"), newWaste);
+
+      setWastes([...wastes, newWaste]);
+
+      setWaste("");
+      setUnit("");
+      setPrice("");
+      setQuantity("");
+
+      handleClose();
+    } catch (error) {
+      console.error("Error adding document: ", error);
+    }
+  };
+
+  const handleEdit = (wasteItem) => {
+    setEditingWaste(wasteItem);
+    setWaste(wasteItem.waste);
+    setUnit(wasteItem.unit);
+    setPrice(wasteItem.price);
+    setQuantity(wasteItem.quantity);
+    handleOpen();
+  };
+
+  const handleUpdateWaste = async () => {
+    if (!editingWaste) return;
+
+    try {
+      const wasteRef = doc(db, "waste-products", editingWaste.id);
+      await updateDoc(wasteRef, {
+        waste,
+        unit,
+        price: parseInt(price),
+        quantity: parseInt(quantity),
+      });
+
+      setWastes((prevWastes) =>
+        prevWastes.map((item) =>
+          item.id === editingWaste.id
+            ? {
+                ...item,
+                waste,
+                unit,
+                price: parseInt(price),
+                quantity: parseInt(quantity),
+              }
+            : item
+        )
+      );
+
+      setEditingWaste(null);
+      setWaste("");
+      setUnit("");
+      setPrice("");
+      setQuantity("");
+      handleClose();
+    } catch (error) {
+      console.error("Error updating document: ", error);
+    }
+  };
+
   const [wastes, setWastes] = useState([]);
 
   const fetchData = async () => {
@@ -60,7 +144,9 @@ const WasteManagement = () => {
       >
         <Sidebar />
         <div className="w-full py-4 h-screen">
-          <div className="text-2xl font-bold mb-4 text-green-900">Users</div>
+          <div className="text-2xl font-bold mb-4 text-green-900">
+            Waste Products
+          </div>
           <div className="mb-6 flex flex-row gap-4">
             <Button
               onClick={handleOpen}
@@ -113,11 +199,14 @@ const WasteManagement = () => {
                     <b>Price</b>
                   </TableCell>
                   <TableCell sx={{ backgroundColor: "#C2D1C8" }}>
+                    <b>Edit</b>
+                  </TableCell>
+                  {/* <TableCell sx={{ backgroundColor: "#C2D1C8" }}>
                     <b>Quantity</b>
                   </TableCell>
                   <TableCell sx={{ backgroundColor: "#C2D1C8" }}>
                     <b>Total Value</b>
-                  </TableCell>
+                  </TableCell> */}
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -127,9 +216,25 @@ const WasteManagement = () => {
                       <TableCell>{waste.waste}</TableCell>
                       <TableCell>{waste.unit}</TableCell>
                       <TableCell>{Rupiah.format(waste.price)}</TableCell>
-                      <TableCell>{waste.quantity}</TableCell>
+                      <TableCell>
+                        <Button
+                          onClick={() => handleEdit(waste)}
+                          sx={{
+                            backgroundColor: "#4E7972",
+                            borderRadius: 100,
+                            width: 80,
+                            textTransform: "none",
+                          }}
+                          startIcon={<UserPlusIcon className="size-5" />}
+                          variant="contained"
+                        >
+                          Edit
+                        </Button>
+                      </TableCell>
+
+                      {/* <TableCell>{waste.quantity}</TableCell>
                       <TableCell>{Rupiah.format(parseInt(waste.price) * parseInt(waste.quantity))}</TableCell>
-                      <TableCell>{waste.role}</TableCell>
+                      <TableCell>{waste.role}</TableCell> */}
                     </TableRow>
                   );
                 })}
@@ -148,9 +253,43 @@ const WasteManagement = () => {
           <Typography id="modal-modal-title" variant="h6" component="h2">
             Add Waste Product
           </Typography>
-          <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-            Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
-          </Typography>
+          <TextField
+            fullWidth
+            margin="normal"
+            label="Waste Name"
+            value={waste}
+            onChange={(e) => setWaste(e.target.value)}
+          />
+          <TextField
+            fullWidth
+            margin="normal"
+            label="Unit"
+            value={unit}
+            onChange={(e) => setUnit(e.target.value)}
+          />
+          <TextField
+            fullWidth
+            margin="normal"
+            label="Price"
+            type="number"
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+          />
+          {/* <TextField
+      fullWidth
+      margin="normal"
+      label="Quantity"
+      type="number"
+      value={quantity}
+      onChange={(e) => setQuantity(e.target.value)}
+    /> */}
+          <Button
+            onClick={editingWaste ? handleUpdateWaste : handleAddWaste}
+            variant="contained"
+            sx={{ mt: 2 }}
+          >
+            {editingWaste ? "Update" : "Add"}
+          </Button>
         </Box>
       </Modal>
     </>
