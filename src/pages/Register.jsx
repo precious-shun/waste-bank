@@ -4,14 +4,8 @@ import { z } from "zod";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from "../services/firebase";
 import { doc, setDoc } from "firebase/firestore";
-import {
-  TextField,
-  Button,
-  Card,
-  CardContent,
-  Typography,
-  MenuItem,
-} from "@mui/material";
+import { TextField, Button, Card, CardContent, MenuItem } from "@mui/material";
+import { theme } from "../theme";
 
 const registerSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -20,6 +14,15 @@ const registerSchema = z.object({
   gender: z.enum(["Male", "Female"], { message: "Gender is required" }),
   address: z.string().nonempty("Address is required"),
 });
+
+const inputStyle = {
+  ":hover .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline": {
+    borderColor: theme.darkGreen,
+  },
+  ":hover .MuiInputLabel-outlined ": {
+    color: theme.darkGreen,
+  },
+};
 
 const Register = () => {
   const {
@@ -32,11 +35,7 @@ const Register = () => {
 
   const handleRegister = async (data) => {
     try {
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        data.email,
-        data.password
-      );
+      const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
       const user = userCredential.user;
 
       await setDoc(doc(db, "users", user.uid), {
@@ -55,70 +54,28 @@ const Register = () => {
   };
 
   return (
-    <div className="flex justify-center items-center h-screen bg-gray-100">
-      <Card className="w-96 shadow-lg">
+    <div style={{ backgroundColor: theme.lightGrey }} className="flex justify-center items-center h-screen">
+      <Card variant="outlined" sx={{ borderRadius: 4 }} style={{ backgroundColor: theme.lightGreen }} className="w-96 px-1.5">
         <CardContent>
-          <Typography variant="h5" className="text-center mb-4">
+          <p style={{ color: theme.darkGreen }} className="text-center text-2xl font-semibold mb-6">
             Register
-          </Typography>
-          <form onSubmit={handleSubmit(handleRegister)} className="space-y-4">
-            <TextField
-              fullWidth
-              label="Email"
-              variant="outlined"
-              {...register("email")}
-              error={!!errors.email}
-              helperText={errors.email?.message}
-            />
+          </p>
+          <form onSubmit={handleSubmit(handleRegister)} className="space-y-6">
+            <div className="space-y-4">
+              <TextField sx={inputStyle} fullWidth label="Email" variant="outlined" {...register("email")} error={!!errors.email} helperText={errors.email?.message} />
 
-            <TextField
-              fullWidth
-              label="Password"
-              type="password"
-              variant="outlined"
-              {...register("password")}
-              error={!!errors.password}
-              helperText={errors.password?.message}
-            />
+              <TextField sx={inputStyle} fullWidth label="Password" type="password" variant="outlined" {...register("password")} error={!!errors.password} helperText={errors.password?.message} />
 
-            <TextField
-              fullWidth
-              label="Full Name"
-              variant="outlined"
-              {...register("fullname")}
-              error={!!errors.fullname}
-              helperText={errors.fullname?.message}
-            />
+              <TextField sx={inputStyle} fullWidth label="Full Name" variant="outlined" {...register("fullname")} error={!!errors.fullname} helperText={errors.fullname?.message} />
 
-            <TextField
-              fullWidth
-              select
-              label="Gender"
-              variant="outlined"
-              {...register("gender")}
-              error={!!errors.gender}
-              helperText={errors.gender?.message}
-            >
-              <MenuItem value="Male">Male</MenuItem>
-              <MenuItem value="Female">Female</MenuItem>
-            </TextField>
+              <TextField sx={inputStyle} fullWidth select label="Gender" variant="outlined" {...register("gender")} error={!!errors.gender} helperText={errors.gender?.message}>
+                <MenuItem value="Male">Male</MenuItem>
+                <MenuItem value="Female">Female</MenuItem>
+              </TextField>
 
-            <TextField
-              fullWidth
-              label="Address"
-              variant="outlined"
-              {...register("address")}
-              error={!!errors.address}
-              helperText={errors.address?.message}
-            />
-
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-              fullWidth
-              className="bg-blue-500 hover:bg-blue-700 text-white"
-            >
+              <TextField sx={inputStyle} fullWidth label="Address" variant="outlined" {...register("address")} error={!!errors.address} helperText={errors.address?.message} />
+            </div>
+            <Button size="large" sx={{ backgroundColor: theme.green }} type="submit" variant="contained" fullWidth>
               Register
             </Button>
           </form>

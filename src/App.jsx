@@ -4,9 +4,9 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
-import CreateTransaction from "./pages/client/CreateTransaction";
+// import CreateTransaction from "./pages/client/CreateTransaction";
 import UnauthorizedPage from "./pages/UnauthorizedPage";
-import NotificationList from "./pages/admin/notification/NotificationList";
+// import NotificationList from "./pages/admin/notification/NotificationList";
 
 function App() {
   return (
@@ -24,14 +24,14 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route
+        {/* <Route
           path="/admin/notifications"
           element={
             <ProtectedRoute requiredRole="admin">
               <NotificationList />
             </ProtectedRoute>
           }
-        />
+        /> */}
 
         <Route
           path="/dashboard"
@@ -41,14 +41,14 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route
+        {/* <Route
           path="/create-transaction"
           element={
             <ProtectedRoute requiredRole="client">
               <CreateTransaction />
             </ProtectedRoute>
           }
-        />
+        /> */}
       </Routes>
     </BrowserRouter>
   );

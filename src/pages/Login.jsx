@@ -6,18 +6,22 @@ import { auth, db } from "../services/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import {
-  TextField,
-  Button,
-  Card,
-  CardContent,
-  Typography,
-} from "@mui/material";
+import { TextField, Button, Card, CardContent, Typography } from "@mui/material";
+import { theme } from "../theme";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().nonempty("Password is required"),
 });
+
+const inputStyle = {
+  ":hover .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline": {
+    borderColor: theme.darkGreen,
+  },
+  ":hover .MuiInputLabel-outlined ": {
+    color: theme.darkGreen,
+  },
+};
 
 const Login = () => {
   const {
@@ -34,11 +38,7 @@ const Login = () => {
   const handleLogin = async (data) => {
     setError("");
     try {
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        data.email,
-        data.password
-      );
+      const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
       const user = userCredential.user;
 
       const userDoc = await getDoc(doc(db, "users", user.uid));
@@ -58,44 +58,26 @@ const Login = () => {
   };
 
   return (
-    <div className="flex justify-center items-center h-screen bg-gray-100">
-      <Card className="w-96 shadow-lg">
+    <div style={{ backgroundColor: theme.lightGrey }} className="flex justify-center items-center h-screen">
+      <Card variant="outlined" style={{ backgroundColor: theme.lightGreen }} sx={{ borderRadius: 4 }} className="w-96 px-1.5 py-2">
         <CardContent>
-          <Typography variant="h5" className="text-center mb-4">
+          <p style={{ color: theme.darkGreen }} className="text-center text-2xl font-semibold mb-6">
             Login
-          </Typography>
-          <form onSubmit={handleSubmit(handleLogin)} className="space-y-4">
-            <TextField
-              fullWidth
-              label="Email"
-              variant="outlined"
-              {...register("email")}
-              error={!!errors.email}
-              helperText={errors.email?.message}
-            />
+          </p>
+          <form onSubmit={handleSubmit(handleLogin)} className="space-y-6">
+            <div className="space-y-4">
+              <TextField sx={inputStyle} fullWidth label="Email" variant="outlined" {...register("email")} error={!!errors.email} helperText={errors.email?.message} />
 
-            <TextField
-              fullWidth
-              label="Password"
-              type="password"
-              variant="outlined"
-              {...register("password")}
-              error={!!errors.password}
-              helperText={errors.password?.message}
-            />
+              <TextField sx={inputStyle} fullWidth label="Password" type="password" variant="outlined" {...register("password")} error={!!errors.password} helperText={errors.password?.message} />
 
-            {error && (
-              <Typography color="error" className="text-sm">
-                {error}
-              </Typography>
-            )}
+              {error && (
+                <Typography color="error" className="text-sm">
+                  {error}
+                </Typography>
+              )}
+            </div>
 
-            <Button
-              type="submit"
-              variant="contained"
-              fullWidth
-              className="bg-blue-500 hover:bg-blue-700 text-white"
-            >
+            <Button size="large" sx={{ backgroundColor: theme.green }} type="submit" variant="contained" fullWidth>
               Login
             </Button>
           </form>
