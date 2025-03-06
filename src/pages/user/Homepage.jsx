@@ -10,27 +10,18 @@ import Navbar from "../../components/Navbar";
 
 const colors = {
   darkGreen: "#2C514B",
-  green: "4E7972",
+  green: "#4E7972",
   lightGreen: "#C2D1C8",
   orange: "#D66C42",
   lightGrey: "#ebebeb",
   white: "#ffffff",
 };
 
-const formattedDate = new Date("2025-03-06").toLocaleDateString("id-ID", {
-  weekday: "long",
-  day: "numeric",
-  month: "long",
-  year: "numeric",
-});
-
-console.log(formattedDate);
-
 const transactions = [
   {
     username: "Susanti",
     total: 1800000,
-    date: new Date("6 Maret 2025"),
+    date: new Date("2025-03-06"),
     products: [
       { name: "Kertas Daur Ulang", quantity: 3, subtotal: 450000 },
       { name: "Botol Plastik", quantity: 5, subtotal: 750000 },
@@ -40,7 +31,7 @@ const transactions = [
   {
     username: "Susanti",
     total: 1125000,
-    date: new Date("5 Maret 2025"),
+    date: new Date("2025-03-05"),
     products: [
       { name: "Botol Kaca", quantity: 2, subtotal: 375000 },
       { name: "Kardus", quantity: 4, subtotal: 750000 },
@@ -55,9 +46,10 @@ const totalBalance = transactions.reduce(
 
 const Homepage = () => {
   return (
-    <>
+    <Box sx={{ backgroundColor: colors.lightGrey, minHeight: "100vh" }}>
       <Navbar />
-      <Box sx={{ backgroundColor: colors.lightGrey, minHeight: "100vh", p: 3 }}>
+
+      <Box sx={{ p: 3 }}>
         {/* Greeting Section */}
         <Typography
           variant="h4"
@@ -66,7 +58,7 @@ const Homepage = () => {
           Selamat datang, Susanti!
         </Typography>
 
-        {/* Balance Display */}
+        {/* Account Balance */}
         <Paper
           sx={{
             p: 2,
@@ -91,6 +83,7 @@ const Homepage = () => {
           <Typography variant="h6" sx={{ color: colors.green, mb: 1 }}>
             Riwayat Transaksi
           </Typography>
+
           <List>
             {transactions.map((transaction, index) => (
               <ListItem key={index} divider sx={{ display: "block" }}>
@@ -98,9 +91,9 @@ const Homepage = () => {
                   variant="subtitle1"
                   sx={{ fontWeight: "bold", color: colors.darkGreen }}
                 >
-                  {transaction.username} - Rp{" "}
-                  {transaction.total.toLocaleString("id-ID")}
+                  Rp {transaction.total.toLocaleString("id-ID")}
                 </Typography>
+
                 <Typography variant="body2" sx={{ color: colors.green }}>
                   {transaction.date.toLocaleDateString("id-ID", {
                     weekday: "long",
@@ -109,6 +102,7 @@ const Homepage = () => {
                     year: "numeric",
                   })}
                 </Typography>
+
                 <List sx={{ pl: 2, mt: 1 }}>
                   {transaction.products.map((product, idx) => (
                     <ListItem
@@ -127,7 +121,7 @@ const Homepage = () => {
           </List>
         </Paper>
       </Box>
-    </>
+    </Box>
   );
 };
 
