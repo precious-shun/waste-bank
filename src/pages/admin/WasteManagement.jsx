@@ -6,7 +6,12 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import Sidebar from "../../components/Sidebar";
-import { UserPlusIcon, MagnifyingGlassIcon } from "@heroicons/react/24/solid";
+import {
+  UserPlusIcon,
+  MagnifyingGlassIcon,
+  PencilSquareIcon,
+  TrashIcon,
+} from "@heroicons/react/24/solid";
 import { Box, Button, Modal, TextField, Typography } from "@mui/material";
 
 import { db } from "../../firebase";
@@ -19,6 +24,15 @@ import {
   deleteDoc,
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
+
+const theme = {
+  darkGreen: "#2C514B",
+  green: "#4E7972",
+  lightGreen: "#C2D1C8",
+  orange: "#D66C42",
+  lightGrey: "#ebebeb",
+  white: "#ffffff",
+};
 
 const style = {
   position: "absolute",
@@ -200,11 +214,17 @@ const WasteManagement = () => {
                 slotProps={{
                   input: {
                     startAdornment: (
-                      <MagnifyingGlassIcon className="size-5 mr-2" />
+                      <MagnifyingGlassIcon
+                        style={{ color: theme.orange }}
+                        className="size-5 mr-2"
+                      />
                     ),
                   },
                 }}
-                sx={{ "& fieldset": { borderRadius: 100 } }}
+                sx={{
+                  "& fieldset": { borderRadius: 100 },
+                  input: { "&::placeholder": { color: theme.orange } },
+                }}
                 size="small"
               />
             </Paper>
@@ -230,9 +250,7 @@ const WasteManagement = () => {
                   <TableCell sx={{ backgroundColor: "#C2D1C8" }}>
                     <b>Price</b>
                   </TableCell>
-                  <TableCell sx={{ backgroundColor: "#C2D1C8" }}>
-                    <b>Edit</b>
-                  </TableCell>
+                  <TableCell sx={{ backgroundColor: "#C2D1C8" }}></TableCell>
                   {/* <TableCell sx={{ backgroundColor: "#C2D1C8" }}>
                     <b>Quantity</b>
                   </TableCell>
@@ -248,20 +266,7 @@ const WasteManagement = () => {
                       <TableCell>{waste.waste}</TableCell>
                       <TableCell>{waste.unit}</TableCell>
                       <TableCell>{Rupiah.format(waste.price)}</TableCell>
-                      <TableCell>
-                        <Button
-                          onClick={() => handleEdit(waste)}
-                          sx={{
-                            backgroundColor: "#4E7972",
-                            borderRadius: 100,
-                            width: 80,
-                            textTransform: "none",
-                          }}
-                          startIcon={<UserPlusIcon className="size-5" />}
-                          variant="contained"
-                        >
-                          Edit
-                        </Button>
+                      <TableCell align="right" sx={{ display: "flex", gap: 1 }}>
                         <Button
                           onClick={() => {
                             setDeleteTarget(waste);
@@ -270,13 +275,26 @@ const WasteManagement = () => {
                           sx={{
                             backgroundColor: "#4E7972",
                             borderRadius: 100,
-                            width: 80,
+                            height: 34,
                             textTransform: "none",
                           }}
-                          startIcon={<UserPlusIcon className="size-5" />}
                           variant="contained"
                         >
-                          Delete
+                          <TrashIcon className="size-5" />
+                          <span className="ms-1.5 mt-0.5">Delete</span>
+                        </Button>
+                        <Button
+                          onClick={() => handleEdit(waste)}
+                          sx={{
+                            backgroundColor: "#4E7972",
+                            borderRadius: 100,
+                            height: 34,
+                            textTransform: "none",
+                          }}
+                          variant="contained"
+                        >
+                          <PencilSquareIcon className="size-5" />
+                          <span className="ms-1.5 mt-0.5">Edit</span>
                         </Button>
                       </TableCell>
 
@@ -306,14 +324,20 @@ const WasteManagement = () => {
           >
             Are you sure you want to delete this data?
           </Typography>
+
           <Button
             variant="contained"
-            sx={{ mt: 2, mr: 2, backgroundColor: "#D32F2F" }}
+            sx={{ mt: 2, mr: 2, backgroundColor: theme.darkGreen }}
             onClick={handleDelete}
           >
             Yes
           </Button>
-          <Button variant="contained" sx={{ mt: 2 }} onClick={confirmClose}>
+          <Button
+            variant="contained"
+            color="error"
+            sx={{ mt: 2 }}
+            onClick={confirmClose}
+          >
             No
           </Button>
         </Box>

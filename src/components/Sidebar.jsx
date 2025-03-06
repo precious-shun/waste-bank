@@ -8,14 +8,44 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
+import Logo from "../assets/logo.svg";
+import { Avatar } from "@mui/material";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   ArchiveBoxIcon,
   DocumentTextIcon,
   Squares2X2Icon,
   UserGroupIcon,
 } from "@heroicons/react/24/solid";
-import { Avatar } from "@mui/material";
-import { useNavigate, useLocation } from "react-router-dom";
+
+const sidebarColor = {
+  darkGreen: "#2C514B",
+  green: "#4E7972",
+  white: "#ffffff",
+};
+
+const sidebarItem = [
+  {
+    name: "Dashboard",
+    icon: <Squares2X2Icon className="size-6 ms-2 text-white" />,
+    path: "/dashboard",
+  },
+  {
+    name: "Users",
+    icon: <UserGroupIcon className="size-6 ms-2 text-white" />,
+    path: "/",
+  },
+  {
+    name: "Waste Products",
+    icon: <ArchiveBoxIcon className="size-6 ms-2 text-white" />,
+    path: "/waste",
+  },
+  {
+    name: "Transactions",
+    icon: <DocumentTextIcon className="size-6 ms-2 text-white" />,
+    path: "/transaction",
+  },
+];
 
 const Sidebar = () => {
   const navigate = useNavigate();
@@ -34,67 +64,43 @@ const Sidebar = () => {
           variant="permanent"
           anchor="left"
         >
-          <Toolbar sx={{ backgroundColor: "#2C514B" }}>
-            <div className="text-2xl font-bold text-white">Logo</div>
+          <Toolbar
+            className="flex justify-center"
+            sx={{ backgroundColor: sidebarColor.darkGreen }}
+          >
+            <img src={Logo} className="h-28" alt="Logo" />
           </Toolbar>
-          <Divider sx={{ backgroundColor: "#4E7972" }} />
-          <List sx={{ backgroundColor: "#2C514B", height: "100%" }}>
-            <ListItem disablePadding>
-              <ListItemButton>
-                <ListItemIcon>
-                  <UserGroupIcon className="size-6 ms-2 text-white" />
-                </ListItemIcon>
-                <ListItemText sx={{ color: "white" }} primary="Dashboard" />
-              </ListItemButton>
-            </ListItem>
-            <ListItem disablePadding>
-              <ListItemButton
-                selected={location.pathname === "/"}
-                onClick={() => navigate("/")}
-                sx={{
-                  "&.Mui-selected": {
-                    backgroundColor: "#335F58",
-                    ":hover": { backgroundColor: "#335F58" },
-                  },
-                }}
-              >
-                <ListItemIcon>
-                  <Squares2X2Icon className="size-6 ms-2 text-white" />
-                </ListItemIcon>
-                <ListItemText sx={{ color: "white" }} primary="Users" />
-              </ListItemButton>
-            </ListItem>
-            <ListItem disablePadding>
-              <ListItemButton
-                selected={location.pathname === "/waste"}
-                onClick={() => navigate("/waste")}
-                sx={{
-                  "&.Mui-selected": {
-                    backgroundColor: "#335F58",
-                    ":hover": { backgroundColor: "#335F58" },
-                  },
-                }}
-              >
-                <ListItemIcon>
-                  <ArchiveBoxIcon className="size-6 ms-2 text-white" />
-                </ListItemIcon>
-                <ListItemText
-                  sx={{ color: "white" }}
-                  primary="Waste Products"
-                />
-              </ListItemButton>
-            </ListItem>
-            <ListItem disablePadding>
-              <ListItemButton>
-                <ListItemIcon>
-                  <DocumentTextIcon className="size-6 ms-2 text-white" />
-                </ListItemIcon>
-                <ListItemText sx={{ color: "white" }} primary="Transactions" />
-              </ListItemButton>
-            </ListItem>
+          <Divider sx={{ backgroundColor: sidebarColor.green }} />
+          <List
+            sx={{ backgroundColor: sidebarColor.darkGreen, height: "100%" }}
+          >
+            {sidebarItem.map((item, index) => {
+              return (
+                <ListItem key={index} disablePadding>
+                  <ListItemButton
+                    selected={location.pathname === item.path}
+                    onClick={() => navigate(item.path)}
+                    sx={{
+                      "&.Mui-selected": {
+                        backgroundColor: "#335F58",
+                        ":hover": { backgroundColor: "#335F58" },
+                      },
+                    }}
+                  >
+                    <ListItemIcon>{item.icon}</ListItemIcon>
+                    <ListItemText
+                      sx={{ color: sidebarColor.white }}
+                      primary={item.name}
+                    />
+                  </ListItemButton>
+                </ListItem>
+              );
+            })}
           </List>
-          <Divider sx={{ backgroundColor: "#4E7972" }} />
-          <List sx={{ marginTop: "auto", backgroundColor: "#2C514B" }}>
+          <Divider sx={{ backgroundColor: sidebarColor.green }} />
+          <List
+            sx={{ marginTop: "auto", backgroundColor: sidebarColor.darkGreen }}
+          >
             <ListItem disablePadding>
               <ListItemButton>
                 <Avatar
@@ -103,7 +109,7 @@ const Sidebar = () => {
                   src="/static/images/avatar/1.jpg"
                 />
                 <ListItemText
-                  sx={{ color: "white" }}
+                  sx={{ color: sidebarColor.white }}
                   primary="Arief Kamaluddin"
                 />
               </ListItemButton>
