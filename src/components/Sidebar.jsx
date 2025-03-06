@@ -28,12 +28,12 @@ const sidebarItem = [
   {
     name: "Dashboard",
     icon: <Squares2X2Icon className="size-6 ms-2 text-white" />,
-    path: "/dashboard",
+    path: "/",
   },
   {
     name: "Users",
     icon: <UserGroupIcon className="size-6 ms-2 text-white" />,
-    path: "/",
+    path: "/users",
   },
   {
     name: "Waste Products",

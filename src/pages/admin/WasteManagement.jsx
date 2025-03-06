@@ -350,65 +350,53 @@ const WasteManagement = () => {
         aria-describedby="modal-modal-description"
       >
         <Box sx={style}>
-          <Typography id="modal-modal-title" variant="h6" component="h2">
-            Are you sure you want to delete this data?
-          </Typography>
-          <Button variant="contained" sx={{ mt: 2 }}>
-            Yes
-          </Button>
-          <Button variant="contained" sx={{ mt: 2 }}>
-            No
-          </Button>
-        </Box>
-      </Modal>
-
-      <Modal
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <Box sx={style}>
-          <Typography id="modal-modal-title" variant="h6" component="h2">
-            Add Waste Product
-          </Typography>
-          <TextField
-            fullWidth
-            margin="normal"
-            label="Waste Name"
-            value={waste}
-            onChange={(e) => setWaste(e.target.value)}
-          />
-          <TextField
-            fullWidth
-            margin="normal"
-            label="Unit"
-            value={unit}
-            onChange={(e) => setUnit(e.target.value)}
-          />
-          <TextField
-            fullWidth
-            margin="normal"
-            label="Price"
-            type="number"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-          />
-          {/* <TextField
-      fullWidth
-      margin="normal"
-      label="Quantity"
-      type="number"
-      value={quantity}
-      onChange={(e) => setQuantity(e.target.value)}
-    /> */}
-          <Button
-            onClick={editingWaste ? handleUpdateWaste : handleAddWaste}
-            variant="contained"
-            sx={{ mt: 2 }}
-          >
-            {editingWaste ? "Update" : "Add"}
-          </Button>
+          <div className="text-2xl font-semibold mb-6">
+            {editingWaste ? "Edit Waste" : "Add Waste Category"}
+          </div>
+          <div className="flex flex-col gap-4">
+            <TextField
+              fullWidth
+              size="small"
+              name="waste"
+              type="text"
+              variant="filled"
+              label="Waste Name"
+              value={waste}
+              onChange={(e) => setWaste(e.target.value)}
+            />
+            <TextField
+              fullWidth
+              size="small"
+              name="unit"
+              type="text"
+              variant="filled"
+              label="Unit"
+              value={unit}
+              onChange={(e) => setUnit(e.target.value)}
+            />
+            <TextField
+              fullWidth
+              size="small"
+              name="email"
+              variant="filled"
+              label="Price"
+              type="number"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+            />
+          </div>
+          <div className="mt-8">
+            <Button
+              style={{ backgroundColor: theme.green }}
+              size="large"
+              fullWidth
+              onClick={editingWaste ? handleUpdateWaste : handleAddWaste}
+              variant="contained"
+              sx={{ mt: 2 }}
+            >
+              {editingWaste ? "Update" : "Add"}
+            </Button>
+          </div>
         </Box>
       </Modal>
     </>
