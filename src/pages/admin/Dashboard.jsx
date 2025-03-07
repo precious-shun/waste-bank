@@ -71,7 +71,9 @@ const Dashboard = () => {
 
         transactionsSnapshot.forEach((doc) => {
           const data = doc.data();
-          const date = new Date(data.date);
+          const date = data.date.toDate
+            ? data.date.toDate()
+            : new Date(data.date);
           const monthYear = date.toLocaleString("id-ID", {
             month: "short",
             year: "numeric",
@@ -85,10 +87,33 @@ const Dashboard = () => {
         });
 
         // Konversi ke array dan urutkan berdasarkan bulan
-        const formattedData = Object.values(monthlyData).sort(
-          (a, b) => new Date("1 " + a.month) - new Date("1 " + b.month)
-        );
+        const monthNames = [
+          "Jan",
+          "Feb",
+          "Mar",
+          "Apr",
+          "Mei",
+          "Jun",
+          "Jul",
+          "Agu",
+          "Sep",
+          "Okt",
+          "Nov",
+          "Des",
+        ];
 
+        const formattedData = Object.values(monthlyData).sort((a, b) => {
+          const [monthA, yearA] = a.month.split(" "); // Pisahkan bulan & tahun
+          const [monthB, yearB] = b.month.split(" ");
+
+          const yearDiff = parseInt(yearA) - parseInt(yearB); // Bandingkan tahun
+          if (yearDiff !== 0) return yearDiff;
+
+          return monthNames.indexOf(monthA) - monthNames.indexOf(monthB); // Bandingkan bulan
+        });
+
+        console.log(monthlyData);
+        console.log(formattedData);
         setChartData(formattedData);
       } catch (error) {
         console.error("Error fetching transactions:", error);
@@ -142,7 +167,11 @@ const Dashboard = () => {
                       </Typography>
                       <Typography
                         variant="h4"
-                        sx={{ mt: 1, color: " #2c514b" }}
+                        sx={{
+                          mt: 1,
+                          color: " #2c514b",
+                          fontWeight: 600,
+                        }}
                       >
                         {stat.value}
                       </Typography>
@@ -150,6 +179,36 @@ const Dashboard = () => {
                   </Grid>
                 ))}
               </Grid>
+
+              {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
+                {[
+                  { title: "Total Users", value: report.total_users },
+                  {
+                    title: "Total Waste",
+                    value: `${report.total_quantity} Kg`,
+                  },
+                  {
+                    title: "Total Balance",
+                    value: `Rp ${report.total_balance.toLocaleString("id-ID")}`,
+                  },
+                  {
+                    title: "Total Transaction",
+                    value: `${report.total_transactions}`,
+                  },
+                ].map((stat, index) => (
+                  <div
+                    key={index}
+                    className="bg-white shadow-md rounded-lg p-6 text-center hover:shadow-lg transition"
+                  >
+                    <h3 className="text-lg font-semibold text-gray-600">
+                      {stat.title}
+                    </h3>
+                    <p className="text-2xl font-bold text-gray-900 mt-2">
+                      {stat.value}
+                    </p>
+                  </div>
+                ))}
+              </div> */}
 
               {/* example */}
               <Paper
