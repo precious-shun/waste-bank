@@ -1,21 +1,9 @@
-import { Button } from "@mui/material";
+import WastePrices from "./pages/user/WastePrices";
 
 function App() {
   return (
     <>
-      <div className="flex flex-col">
-        <Button variant="text" color="error">
-          Text
-        </Button>
-        <Button variant="contained">Contained</Button>
-        <Button variant="outlined">Outlined</Button>
-        <p className="text-red-500">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempore,
-          consequatur aliquam quod ab in, voluptates possimus minus libero
-          labore ex ducimus excepturi error perspiciatis! Vero eos dicta aperiam
-          modi unde?
-        </p>
-      </div>
+      <WastePrices />
     </>
   );
 }
