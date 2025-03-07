@@ -135,7 +135,7 @@ function TransactionHistory() {
                     }}
                     variant="contained"
                   >
-                    Detail
+                    View
                   </Button>
                 </TableCell>
               </TableRow>
