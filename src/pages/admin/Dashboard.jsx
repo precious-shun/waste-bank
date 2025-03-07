@@ -134,6 +134,7 @@ const Dashboard = () => {
                         p: 3,
                         textAlign: "center",
                         backgroundColor: "#c2d1c8",
+                        borderRadius: "20px",
                       }}
                     >
                       <Typography variant="h6" sx={{ color: " #2c514b" }}>
@@ -151,7 +152,14 @@ const Dashboard = () => {
               </Grid>
 
               {/* example */}
-              <Paper sx={{ p: 3, mt: 3, backgroundColor: "#c2d1c8" }}>
+              <Paper
+                sx={{
+                  p: 3,
+                  mt: 3,
+                  backgroundColor: "#c2d1c8",
+                  borderRadius: "20px",
+                }}
+              >
                 <Typography
                   variant="h6"
                   gutterBottom

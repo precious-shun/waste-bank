@@ -186,7 +186,11 @@ const UsersManagement = () => {
           </div>
           <TableContainer
             elevation="0"
-            sx={{ backgroundColor: theme.lightGreen, height: "75%" }}
+            sx={{
+              backgroundColor: theme.lightGreen,
+              height: "75%",
+              borderRadius: "20px",
+            }}
             component={Paper}
           >
             <Table

@@ -231,7 +231,11 @@ const WasteManagement = () => {
           </div>
           <TableContainer
             elevation="0"
-            sx={{ backgroundColor: "#C2D1C8", height: "80%" }}
+            sx={{
+              backgroundColor: "#C2D1C8",
+              height: "80%",
+              borderRadius: "20px",
+            }}
             component={Paper}
           >
             <Table
