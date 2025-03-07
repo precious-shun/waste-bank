@@ -9,7 +9,9 @@ import {
 import Navbar from "../../components/Navbar";
 import { useEffect, useState } from "react";
 import { collection, getDocs, getDoc } from "firebase/firestore";
-import { db } from "../../firebase";
+import { db, auth } from "../../firebase";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
 
 const colors = {
   darkGreen: "#2C514B",
@@ -44,6 +46,10 @@ const colors = {
 
 const Homepage = () => {
   const [transactions, setTrans] = useState([]);
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
+
+  console.log(auth.currentUser);
   //   const loginID = "aOSiV98JHmOdxEifE8dYQoWH05l2";
 
   useEffect(() => {
@@ -116,6 +122,28 @@ const Homepage = () => {
     fetchTransaction();
   }, []);
 
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        navigate("/");
+      } else {
+        setUser(user);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [navigate]);
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      console.log("User logged out");
+      console.log(auth?.currentUser?.email);
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
+  };
+
   const totalBalance = transactions.reduce(
     (sum, transaction) => sum + transaction.total,
     0
@@ -130,7 +158,7 @@ const Homepage = () => {
           variant="h4"
           sx={{ color: colors.darkGreen, fontWeight: "bold" }}
         >
-          Selamat datang, User!
+          Selamat datang, {user?.email}!
         </Typography>
 
         {/* Account Balance */}

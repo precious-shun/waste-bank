@@ -4,17 +4,55 @@ import Dashboard from "./pages/admin/Dashboard";
 import Homepage from "./pages/user/Homepage";
 import { Routes, Route } from "react-router-dom";
 // import { Home } from "@mui/icons-material";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import ProtectedRoute from "./components/ProtectedRoute";
+// import CreateTransaction from "./pages/client/CreateTransaction";
+import UnauthorizedPage from "./pages/UnauthorizedPage";
+// import NotificationList from "./pages/admin/notification/NotificationList";
 
 function App() {
   return (
-    <>
-      <Homepage />
-      {/* <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/users" element={<UsersManagement />} />
-        <Route path="/waste" element={<WasteManagement />} />
-      </Routes> */}
-    </>
+    <Routes>
+      <Route path="/" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/unauthorized" element={<UnauthorizedPage />} />
+
+      {/* <Route
+        path="/admin/dashboard"
+        element={
+          <ProtectedRoute requiredRole="admin">
+            <AdminDashboard />
+          </ProtectedRoute>
+        }
+      /> */}
+      <Route
+        path="/user/"
+        element={
+          <ProtectedRoute requiredRole="client">
+            <Homepage />
+          </ProtectedRoute>
+        }
+      />
+      {/* <Route
+          path="/admin/notifications"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <NotificationList />
+            </ProtectedRoute>
+          }
+        /> */}
+
+      {/* <Route
+          path="/create-transaction"
+          element={
+            <ProtectedRoute requiredRole="client">
+              <CreateTransaction />
+            </ProtectedRoute>
+          }
+        /> */}
+    </Routes>
   );
 }
 

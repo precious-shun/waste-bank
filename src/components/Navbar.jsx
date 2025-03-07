@@ -17,7 +17,7 @@ const Navbar = ({ onLogout }) => {
         <Box component="img" src={Logo} alt="Logo" sx={{ height: 80 }} />
 
         <Button
-          onClick={onLogout}
+          onClick={handleLogout}
           sx={{
             backgroundColor: colors.orange,
             color: colors.white,
