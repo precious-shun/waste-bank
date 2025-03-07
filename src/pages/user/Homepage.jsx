@@ -34,35 +34,9 @@ const Homepage = () => {
   const [transactions, setTrans] = useState([]);
   const { user } = useAuth();
   const [fullname, setFullname] = useState("Guest"); // New state for fullname
-  // const [user, setUser] = useState(null);
-  // const navigate = useNavigate();
-
-  // console.log(auth.currentUser);
-  //   const loginID = "aOSiV98JHmOdxEifE8dYQoWH05l2";
 
   useEffect(() => {
     if (!user?.uid) return;
-
-    // const fetchTransaction = async () => {
-    //   try {
-    //     console.log("Fetching transactions for user:", user.uid);
-
-    //     const querySnapshot = await getDocs(
-    //       query(
-    //         collection(db, "transactions"),
-    //         where("user_id", "==", doc(db, "users", user.uid))
-    //       )
-    //     );
-
-    //     console.log("Transactions Found:", querySnapshot.docs.length);
-
-    //     querySnapshot.forEach((docSnapshot) => {
-    //       console.log("Transaction Data:", docSnapshot.data());
-    //     });
-    //   } catch (error) {
-    //     console.error("Error fetching transactions:", error);
-    //   }
-    // };
 
     const fetchTransaction = async () => {
       try {
@@ -76,23 +50,10 @@ const Homepage = () => {
 
         for (const docSnapshot of querySnapshot.docs) {
           const data = docSnapshot.data();
-          // const userRef = data.user_id; // Firestore reference to "users"
           const wasteProducts = data.waste_products || []; // Array of waste products
 
           // let fullfname = "Unknown"; // Default value
           let wasteProductDetails = []; // To store transformed waste products
-
-          // Fetch User Fullname
-          // if (userRef) {
-          //   try {
-          //     const userSnap = await getDoc(userRef);
-          //     if (userSnap.exists()) {
-          //       fullname = userSnap.data().fullname;
-          //     }
-          //   } catch (err) {
-          //     console.error("Error fetching user data:", err);
-          //   }
-          // }
 
           // Fetch Waste Products Data
           wasteProductDetails = await Promise.all(

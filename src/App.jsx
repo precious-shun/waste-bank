@@ -11,6 +11,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 // import CreateTransaction from "./pages/client/CreateTransaction";
 import UnauthorizedPage from "./pages/UnauthorizedPage";
 import { AuthProvider } from "./context/AuthContext";
+import TransactionHistory from "./pages/user/TransactionHistory";
 // import NotificationList from "./pages/admin/notification/NotificationList";
 
 function App() {
@@ -20,7 +21,6 @@ function App() {
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
-
         {/* <Route
         path="/admin/dashboard"
         element={
@@ -37,6 +37,14 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/user/history"
+          element={
+            <ProtectedRoute requiredRole="client">
+              <TransactionHistory />
+            </ProtectedRoute>
+          }
+        />
         {/* <Route
           path="/admin/notifications"
           element={
@@ -45,7 +53,6 @@ function App() {
               </ProtectedRoute>
               }
               /> */}
-
         {/* <Route
           path="/create-transaction"
           element={

@@ -1,6 +1,7 @@
 import { AppBar, Toolbar, Button, Box } from "@mui/material";
 import Logo from "../assets/logo.svg";
 import { useAuth } from "../context/AuthContext";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const colors = {
   darkGreen: "#2C514B",
@@ -14,11 +15,36 @@ const colors = {
 const Navbar = () => {
   const { handleLogout } = useAuth();
 
+  const navigate = useNavigate();
+
   return (
     <AppBar position="static" sx={{ backgroundColor: colors.darkGreen }}>
       <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
         <Box component="img" src={Logo} alt="Logo" sx={{ height: 80 }} />
-
+        <Button
+          onClick={() => navigate("/user/")}
+          sx={{
+            backgroundColor: colors.orange,
+            color: colors.white,
+            "&:hover": {
+              backgroundColor: colors.green,
+            },
+          }}
+        >
+          Home
+        </Button>
+        <Button
+          onClick={() => navigate("/user/history")}
+          sx={{
+            backgroundColor: colors.orange,
+            color: colors.white,
+            "&:hover": {
+              backgroundColor: colors.green,
+            },
+          }}
+        >
+          Detailed History
+        </Button>
         <Button
           onClick={handleLogout}
           sx={{
