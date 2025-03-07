@@ -43,7 +43,7 @@ const sidebarItem = [
   {
     name: "Transactions",
     icon: <DocumentTextIcon className="size-6 ms-2 text-white" />,
-    path: "/transaction",
+    path: "/trans",
   },
 ];
 
