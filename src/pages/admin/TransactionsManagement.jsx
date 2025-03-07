@@ -125,7 +125,11 @@ const TransactionTable = ({ transactions, onView, onEdit, onDelete }) => {
   return (
     <TableContainer
       elevation="0"
-      sx={{ backgroundColor: THEME.lightGreen, height: "80%" }}
+      sx={{
+        backgroundColor: THEME.lightGreen,
+        height: "80%",
+        borderRadius: "20px",
+      }}
       component={Paper}
     >
       <Table

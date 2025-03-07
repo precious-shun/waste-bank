@@ -1,5 +1,13 @@
 //component management
-import { Box, Typography, Grid, Paper, colors } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Grid,
+  Paper,
+  colors,
+  MenuItem,
+  Select,
+} from "@mui/material";
 import {
   LineChart,
   Line,
@@ -18,6 +26,7 @@ import { collection, query, orderBy, limit, getDocs } from "firebase/firestore";
 
 const Dashboard = () => {
   const [totalUsers, setTotalUsers] = useState(0);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
   useEffect(() => {
     const fetchTotalUsers = async () => {
@@ -112,16 +121,21 @@ const Dashboard = () => {
           return monthNames.indexOf(monthA) - monthNames.indexOf(monthB); // Bandingkan bulan
         });
 
+        const filteredData = formattedData.filter((data) => {
+          const year = parseInt(data.month.split(" ")[1]);
+          return year === selectedYear;
+        });
+
         console.log(monthlyData);
         console.log(formattedData);
-        setChartData(formattedData);
+        setChartData(filteredData);
       } catch (error) {
         console.error("Error fetching transactions:", error);
       }
     };
 
     fetchTransactions();
-  }, []);
+  }, [selectedYear]);
 
   return (
     <>
@@ -222,10 +236,25 @@ const Dashboard = () => {
                 <Typography
                   variant="h6"
                   gutterBottom
-                  sx={{ color: " #2c514b" }}
+                  sx={{ color: " #2c514b", fontWeight: 600 }}
                 >
                   Monthly Revenue
                 </Typography>
+                <Select
+                  value={selectedYear}
+                  onChange={(e) => setSelectedYear(e.target.value)}
+                  sx={{
+                    mb: 2,
+                    backgroundColor: "#ebebeb",
+                    borderRadius: "10px",
+                  }}
+                >
+                  {[2022, 2023, 2024, 2025, 2026, 2027].map((year) => (
+                    <MenuItem key={year} value={year}>
+                      {year}
+                    </MenuItem>
+                  ))}
+                </Select>
                 <ResponsiveContainer width="100%" height={280}>
                   <LineChart data={chartData}>
                     <CartesianGrid strokeDasharray="3 3" />
