@@ -10,49 +10,52 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 // import CreateTransaction from "./pages/client/CreateTransaction";
 import UnauthorizedPage from "./pages/UnauthorizedPage";
+import { AuthProvider } from "./context/AuthContext";
 // import NotificationList from "./pages/admin/notification/NotificationList";
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/unauthorized" element={<UnauthorizedPage />} />
+    <AuthProvider>
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
-      {/* <Route
+        {/* <Route
         path="/admin/dashboard"
         element={
           <ProtectedRoute requiredRole="admin">
-            <AdminDashboard />
+          <AdminDashboard />
           </ProtectedRoute>
-        }
-      /> */}
-      <Route
-        path="/user/"
-        element={
-          <ProtectedRoute requiredRole="client">
-            <Homepage />
-          </ProtectedRoute>
-        }
-      />
-      {/* <Route
+          }
+          /> */}
+        <Route
+          path="/user/"
+          element={
+            <ProtectedRoute requiredRole="client">
+              <Homepage />
+            </ProtectedRoute>
+          }
+        />
+        {/* <Route
           path="/admin/notifications"
           element={
             <ProtectedRoute requiredRole="admin">
               <NotificationList />
-            </ProtectedRoute>
-          }
-        /> */}
+              </ProtectedRoute>
+              }
+              /> */}
 
-      {/* <Route
+        {/* <Route
           path="/create-transaction"
           element={
             <ProtectedRoute requiredRole="client">
-              <CreateTransaction />
+            <CreateTransaction />
             </ProtectedRoute>
-          }
-        /> */}
-    </Routes>
+            }
+            /> */}
+      </Routes>
+    </AuthProvider>
   );
 }
 

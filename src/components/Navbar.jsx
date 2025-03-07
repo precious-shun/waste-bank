@@ -1,5 +1,6 @@
 import { AppBar, Toolbar, Button, Box } from "@mui/material";
 import Logo from "../assets/logo.svg";
+import { useAuth } from "../context/AuthContext";
 
 const colors = {
   darkGreen: "#2C514B",
@@ -10,7 +11,9 @@ const colors = {
   white: "#ffffff",
 };
 
-const Navbar = ({ onLogout }) => {
+const Navbar = () => {
+  const { handleLogout } = useAuth;
+
   return (
     <AppBar position="static" sx={{ backgroundColor: colors.darkGreen }}>
       <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>

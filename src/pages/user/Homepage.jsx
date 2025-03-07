@@ -122,27 +122,27 @@ const Homepage = () => {
     fetchTransaction();
   }, []);
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        navigate("/");
-      } else {
-        setUser(user);
-      }
-    });
+  // useEffect(() => {
+  //   const unsubscribe = onAuthStateChanged(auth, (user) => {
+  //     if (!user) {
+  //       navigate("/");
+  //     } else {
+  //       setUser(user);
+  //     }
+  //   });
 
-    return () => unsubscribe();
-  }, [navigate]);
+  //   return () => unsubscribe();
+  // }, [navigate]);
 
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      console.log("User logged out");
-      console.log(auth?.currentUser?.email);
-    } catch (error) {
-      console.error("Error logging out:", error);
-    }
-  };
+  // const handleLogout = async () => {
+  //   try {
+  //     await signOut(auth);
+  //     console.log("User logged out");
+  //     console.log(auth?.currentUser?.email);
+  //   } catch (error) {
+  //     console.error("Error logging out:", error);
+  //   }
+  // };
 
   const totalBalance = transactions.reduce(
     (sum, transaction) => sum + transaction.total,
