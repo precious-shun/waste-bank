@@ -44,7 +44,7 @@ const colors = {
 
 const Homepage = () => {
   const [transactions, setTrans] = useState([]);
-  const loginID = "aOSiV98JHmOdxEifE8dYQoWH05l2";
+  //   const loginID = "aOSiV98JHmOdxEifE8dYQoWH05l2";
 
   useEffect(() => {
     const fetchTransaction = async () => {
@@ -115,10 +115,6 @@ const Homepage = () => {
     fetchTransaction();
   }, []);
 
-  useEffect(() => {
-    console.log("Updated Transactions:", transactions);
-  }, [transactions]);
-
   const totalBalance = transactions.reduce(
     (sum, transaction) => sum + transaction.total,
     0
@@ -133,7 +129,7 @@ const Homepage = () => {
           variant="h4"
           sx={{ color: colors.darkGreen, fontWeight: "bold" }}
         >
-          Selamat datang, Susanti!
+          Selamat datang, User!
         </Typography>
 
         {/* Account Balance */}
