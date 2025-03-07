@@ -8,10 +8,18 @@ import {
 } from "@mui/material";
 import Navbar from "../../components/Navbar";
 import { useEffect, useState } from "react";
-import { collection, getDocs, getDoc } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  getDoc,
+  doc,
+  query,
+  where,
+} from "firebase/firestore";
 import { db, auth } from "../../firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 const colors = {
   darkGreen: "#2C514B",
@@ -22,61 +30,69 @@ const colors = {
   white: "#ffffff",
 };
 
-// const transactions = [
-//   {
-//     username: "Susanti",
-//     total: 1800000,
-//     date: new Date("2025-03-06"),
-//     products: [
-//       { name: "Kertas Daur Ulang", quantity: 3, subtotal: 450000 },
-//       { name: "Botol Plastik", quantity: 5, subtotal: 750000 },
-//       { name: "Kaleng Aluminium", quantity: 8, subtotal: 600000 },
-//     ],
-//   },
-//   {
-//     username: "Susanti",
-//     total: 1125000,
-//     date: new Date("2025-03-05"),
-//     products: [
-//       { name: "Botol Kaca", quantity: 2, subtotal: 375000 },
-//       { name: "Kardus", quantity: 4, subtotal: 750000 },
-//     ],
-//   },
-// ];
-
 const Homepage = () => {
   const [transactions, setTrans] = useState([]);
-  const [user, setUser] = useState(null);
-  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [fullname, setFullname] = useState("Guest"); // New state for fullname
+  // const [user, setUser] = useState(null);
+  // const navigate = useNavigate();
 
-  console.log(auth.currentUser);
+  // console.log(auth.currentUser);
   //   const loginID = "aOSiV98JHmOdxEifE8dYQoWH05l2";
 
   useEffect(() => {
+    if (!user?.uid) return;
+
+    // const fetchTransaction = async () => {
+    //   try {
+    //     console.log("Fetching transactions for user:", user.uid);
+
+    //     const querySnapshot = await getDocs(
+    //       query(
+    //         collection(db, "transactions"),
+    //         where("user_id", "==", doc(db, "users", user.uid))
+    //       )
+    //     );
+
+    //     console.log("Transactions Found:", querySnapshot.docs.length);
+
+    //     querySnapshot.forEach((docSnapshot) => {
+    //       console.log("Transaction Data:", docSnapshot.data());
+    //     });
+    //   } catch (error) {
+    //     console.error("Error fetching transactions:", error);
+    //   }
+    // };
+
     const fetchTransaction = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, "transactions"));
+        const querySnapshot = await getDocs(
+          query(
+            collection(db, "transactions"),
+            where("user_id", "==", doc(db, "users", user.uid))
+          )
+        );
         const transactionsList = []; // Temporary array to store transactions
 
         for (const docSnapshot of querySnapshot.docs) {
           const data = docSnapshot.data();
-          const userRef = data.user_id; // Firestore reference to "users"
+          // const userRef = data.user_id; // Firestore reference to "users"
           const wasteProducts = data.waste_products || []; // Array of waste products
 
-          let fullname = "Unknown"; // Default value
+          // let fullfname = "Unknown"; // Default value
           let wasteProductDetails = []; // To store transformed waste products
 
           // Fetch User Fullname
-          if (userRef) {
-            try {
-              const userSnap = await getDoc(userRef);
-              if (userSnap.exists()) {
-                fullname = userSnap.data().fullname;
-              }
-            } catch (err) {
-              console.error("Error fetching user data:", err);
-            }
-          }
+          // if (userRef) {
+          //   try {
+          //     const userSnap = await getDoc(userRef);
+          //     if (userSnap.exists()) {
+          //       fullname = userSnap.data().fullname;
+          //     }
+          //   } catch (err) {
+          //     console.error("Error fetching user data:", err);
+          //   }
+          // }
 
           // Fetch Waste Products Data
           wasteProductDetails = await Promise.all(
@@ -120,29 +136,25 @@ const Homepage = () => {
     };
 
     fetchTransaction();
-  }, []);
+  }, [user]);
 
-  // useEffect(() => {
-  //   const unsubscribe = onAuthStateChanged(auth, (user) => {
-  //     if (!user) {
-  //       navigate("/");
-  //     } else {
-  //       setUser(user);
-  //     }
-  //   });
+  useEffect(() => {
+    const fetchUserFullname = async () => {
+      if (user?.uid) {
+        try {
+          const userDoc = await getDoc(doc(db, "users", user.uid));
 
-  //   return () => unsubscribe();
-  // }, [navigate]);
+          if (userDoc.exists()) {
+            setFullname(userDoc.data().fullname);
+          }
+        } catch (error) {
+          console.error("Error fetching logged-in user's fullname:", error);
+        }
+      }
+    };
 
-  // const handleLogout = async () => {
-  //   try {
-  //     await signOut(auth);
-  //     console.log("User logged out");
-  //     console.log(auth?.currentUser?.email);
-  //   } catch (error) {
-  //     console.error("Error logging out:", error);
-  //   }
-  // };
+    fetchUserFullname();
+  }, [user]); // Runs when the user changes
 
   const totalBalance = transactions.reduce(
     (sum, transaction) => sum + transaction.total,
@@ -158,7 +170,7 @@ const Homepage = () => {
           variant="h4"
           sx={{ color: colors.darkGreen, fontWeight: "bold" }}
         >
-          Selamat datang, {user?.email}!
+          Selamat datang, {fullname || "Guest"}!
         </Typography>
 
         {/* Account Balance */}
@@ -191,20 +203,22 @@ const Homepage = () => {
             {transactions.map((transaction, index) => (
               <ListItem key={index} divider sx={{ display: "block" }}>
                 <Typography
-                  variant="subtitle1"
-                  sx={{ fontWeight: "bold", color: colors.darkGreen }}
+                  variant="body2"
+                  sx={{ color: colors.green, fontWeight: "bold" }}
                 >
-                  {transaction.fullname} - Rp{" "}
-                  {transaction.total.toLocaleString("id-ID")}
-                </Typography>
-
-                <Typography variant="body2" sx={{ color: colors.green }}>
                   {transaction.date.toLocaleDateString("id-ID", {
                     weekday: "long",
                     day: "numeric",
                     month: "long",
                     year: "numeric",
                   })}
+                </Typography>
+
+                <Typography
+                  variant="subtitle1"
+                  sx={{ fontWeight: "bold", color: colors.darkGreen }}
+                >
+                  Rp {transaction.total.toLocaleString("id-ID")}
                 </Typography>
 
                 <List sx={{ pl: 2, mt: 1 }}>

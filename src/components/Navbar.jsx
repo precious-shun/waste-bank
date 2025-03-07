@@ -12,7 +12,7 @@ const colors = {
 };
 
 const Navbar = () => {
-  const { handleLogout } = useAuth;
+  const { handleLogout } = useAuth();
 
   return (
     <AppBar position="static" sx={{ backgroundColor: colors.darkGreen }}>
