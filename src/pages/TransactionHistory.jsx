@@ -7,13 +7,10 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import { useEffect, useState } from "react";
 
-//import { db } from "./firebase";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { db } from "../firebase";
+import { collection, query, where, getDocs, getDoc } from "firebase/firestore";
 import Button from "@mui/material/Button";
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import Modal from "@mui/material/Modal";
-import { List, ListItem, ListItemText } from "@mui/material";
+import { ListItem, ListItemText } from "@mui/material";
 
 const style = {
   position: "absolute",
@@ -27,51 +24,72 @@ const style = {
   borderRadius: "20px",
 };
 
-function createData(name, calories, fat, carbs) {
-  return { name, calories, fat, carbs };
-}
-
-const rows = [
-  createData("Frozen yoghurt", 159, 6.0),
-  createData("Ice cream sandwich", 237, 9.0),
-  createData("Eclair", 262, 16.0),
-  createData("Cupcake", 305, 3.7),
-  createData("Gingerbread", 356, 16.0),
+const transactions1 = [
+  {
+    user_id: "users/aOSiV98JHmOdxEifE8dYQoWH05l2",
+    date: "2025-03-05T04:50:50.225Z",
+    total: 40100,
+    waste_products: [
+      {
+        waste_product_id: "1vt8ZR1FoVNm7tz7d2Zq",
+        quantity: 3,
+        subtotal: 22500,
+      },
+      {
+        waste_product_id: "5daXP6htmdONySFdKh7e",
+        quantity: 5,
+        subtotal: 14000,
+      },
+    ],
+  },
+  {
+    user_id: "users/aOSiV98JHmOdxEifE8dYQoWH05l2",
+    date: "2025-03-05T04:50:50.225Z",
+    total: 40100,
+    waste_products: [
+      {
+        waste_product_id: "1vt8ZR1FoVNm7tz7d2Zq",
+        quantity: 3,
+        subtotal: 22500,
+      },
+      {
+        waste_product_id: "5daXP6htmdONySFdKh7e",
+        quantity: 5,
+        subtotal: 14000,
+      },
+    ],
+  },
 ];
 
 function TransactionHistory() {
   const [transactions, setTransactions] = useState([]);
-  const [open, setOpen] = useState(false);
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const [selectedTransaction, setSelectedTransaction] = useState(null);
 
   useEffect(() => {
-    const fetchTransactions = async () => {
-      try {
-        const transactionRef = collection(db, "transaction");
-        const q = query(
-          transactionRef,
-          where("user_id", "==", `users/${currentUser.uid}`)
-        );
-        const querySnapshot = await getDocs(q);
-
-        const transactionData = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-
-        setTransactions(transactionData);
-      } catch (error) {
-        console.error("Gagal mengambil data transaksi:", error);
-      }
-    };
-
-    fetchTransactions();
+    // const fetchTransactions = async () => {
+    //   try {
+    //     const transactionsRef = collection(db, "transaction");
+    //     const q = query(
+    //       transactionsRef,
+    //       where("user_id", "==", `users/${currentUser.uid}`)
+    //     );
+    //     const querySnapshot = await getDocs(q);
+    //     const transactionData = querySnapshot.docs.map((doc) => ({
+    //       id: doc.id,
+    //       ...doc.data(),
+    //     }));
+    //     console.log(transactionData);
+    //     setTransactions(transactionData);
+    //   } catch (error) {
+    //     console.error("Gagal mengambil data transaksi:", error);
+    //   }
+    // };
+    // fetchTransactions();
   }, []);
 
   return (
     <div className="p-6">
-      <h2 className="text-2xl font-semibold mb-4 text-green-900">
+      <h2 className="text-2xl font-bold mb-4 text-green-900">
         Transaction History
       </h2>
 
@@ -88,19 +106,27 @@ function TransactionHistory() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((row) => (
+            {transactions1.map((transaction, index) => (
               <TableRow
-                key={row.name}
+                key={index}
                 sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
               >
                 <TableCell component="th" scope="row">
-                  {row.name}
+                  {new Date(transaction.date).toLocaleDateString("id-ID")}
                 </TableCell>
-                <TableCell align="center">{row.calories}</TableCell>
-                <TableCell align="center">{row.fat}</TableCell>
+                <TableCell align="center">
+                  Rp {transaction.total.toLocaleString("id-ID")}
+                </TableCell>
+                <TableCell align="center">
+                  {transaction.waste_products.reduce(
+                    (sum, item) => sum + item.quantity,
+                    0
+                  )}{" "}
+                  Kg
+                </TableCell>
                 <TableCell align="center">
                   <Button
-                    onClick={() => handleOpen(row)}
+                    onClick={() => setSelectedTransaction(transaction)}
                     sx={{
                       backgroundColor: "#2c514b",
                       borderRadius: 100,
@@ -118,29 +144,34 @@ function TransactionHistory() {
         </Table>
       </TableContainer>
 
-      <Modal
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <Box sx={style}>
-          <Typography id="modal-modal-title" variant="h6" component="h2">
-            Transaction Detail
-          </Typography>
-          <List id="modal-modal-description">
-            <ListItem>
-              <ListItemText primary="Item 1" />
-            </ListItem>
-            {/* {selectedTransaction.waste_products.map((item, index) => (
-              <ListItem key={index} className="py-1">
-                Sampah ID: {item.waste_product_id} | Qty: {item.quantity} |
-                Subtotal: Rp {item.subtotal.toLocaleString("id-ID")}
-              </ListItem>
-            ))} */}
-          </List>
-        </Box>
-      </Modal>
+      {selectedTransaction && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-2xl">
+            <h3 className="text-lg font-semibold mb-4">Detail Transaksi</h3>
+            <ul className="mb-4">
+              {selectedTransaction.waste_products.map((product, idx) => (
+                <ListItem
+                  key={idx}
+                  sx={{ display: "flex", justifyContent: "space-between" }}
+                >
+                  <ListItemText
+                    primary={`${product.waste} (x${product.quantity})`}
+                    secondary={`Subtotal: Rp ${product.subtotal.toLocaleString(
+                      "id-ID"
+                    )}`}
+                  />
+                </ListItem>
+              ))}
+            </ul>
+            <button
+              onClick={() => setSelectedTransaction(null)}
+              className="bg-green-900 rounded-xl text-white px-4 py-2 mt-4"
+            >
+              Tutup
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
