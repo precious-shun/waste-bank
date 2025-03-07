@@ -50,8 +50,9 @@ const Homepage = () => {
     const fetchTransaction = async () => {
       try {
         const querySnapshot = await getDocs(collection(db, "transactions"));
+        const transactionsList = []; // Temporary array to store transactions
 
-        querySnapshot.forEach(async (docSnapshot) => {
+        for (const docSnapshot of querySnapshot.docs) {
           const data = docSnapshot.data();
           const userRef = data.user_id; // Firestore reference to "users"
           const wasteProducts = data.waste_products || []; // Array of waste products
@@ -95,18 +96,18 @@ const Homepage = () => {
             })
           );
 
-          // Update state incrementally
-          setTrans((prevTrans) => [
-            ...prevTrans,
-            {
-              id: docSnapshot.id,
-              date: data.date.toDate(),
-              total: data.total,
-              fullname, // Store fullname instead of user_id
-              waste_products: wasteProductDetails, // Store waste details instead of waste_product_id
-            },
-          ]);
-        });
+          // Store transaction in the temporary array
+          transactionsList.push({
+            id: docSnapshot.id,
+            date: data.date.toDate(),
+            total: data.total,
+            fullname, // Store fullname instead of user_id
+            waste_products: wasteProductDetails, // Store waste details instead of waste_product_id
+          });
+        }
+
+        // Update state once with all transactions
+        setTrans(transactionsList);
       } catch (error) {
         console.error("Error fetching transactions:", error);
       }
