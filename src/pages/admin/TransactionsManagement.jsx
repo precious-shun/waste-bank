@@ -27,6 +27,7 @@ import {
   MenuItem,
   IconButton,
   Autocomplete,
+  FormHelperText,
 } from "@mui/material";
 
 import { db } from "../../firebase";
@@ -45,8 +46,11 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
+import { useForm, useFieldArray, Controller } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-const THEME = {
+const theme = {
   darkGreen: "#2C514B",
   green: "#4E7972",
   lightGreen: "#C2D1C8",
@@ -55,7 +59,7 @@ const THEME = {
   white: "#ffffff",
 };
 
-const MODAL_STYLE = {
+const boxStyle = {
   position: "absolute",
   top: "50%",
   left: "50%",
@@ -83,7 +87,7 @@ const TransactionHeader = ({ onAddClick, searchQuery, onSearchChange }) => {
         <Button
           onClick={onAddClick}
           sx={{
-            backgroundColor: THEME.green,
+            backgroundColor: theme.green,
             borderRadius: 100,
             width: 280,
             textTransform: "none",
@@ -103,7 +107,7 @@ const TransactionHeader = ({ onAddClick, searchQuery, onSearchChange }) => {
               input: {
                 startAdornment: (
                   <MagnifyingGlassIcon
-                    style={{ color: THEME.orange }}
+                    style={{ color: theme.orange }}
                     className="size-5 mr-2"
                   />
                 ),
@@ -111,7 +115,7 @@ const TransactionHeader = ({ onAddClick, searchQuery, onSearchChange }) => {
             }}
             sx={{
               "& fieldset": { borderRadius: 100 },
-              input: { "&::placeholder": { color: THEME.orange } },
+              input: { "&::placeholder": { color: theme.orange } },
             }}
             size="small"
           />
@@ -126,7 +130,7 @@ const TransactionTable = ({ transactions, onView, onEdit, onDelete }) => {
     <TableContainer
       elevation="0"
       sx={{
-        backgroundColor: THEME.lightGreen,
+        backgroundColor: theme.lightGreen,
         height: "80%",
         borderRadius: "20px",
       }}
@@ -139,16 +143,16 @@ const TransactionTable = ({ transactions, onView, onEdit, onDelete }) => {
       >
         <TableHead>
           <TableRow>
-            <TableCell sx={{ backgroundColor: THEME.lightGreen }}>
+            <TableCell sx={{ backgroundColor: theme.lightGreen }}>
               <b>Date</b>
             </TableCell>
-            <TableCell sx={{ backgroundColor: THEME.lightGreen }}>
+            <TableCell sx={{ backgroundColor: theme.lightGreen }}>
               <b>User</b>
             </TableCell>
-            <TableCell sx={{ backgroundColor: THEME.lightGreen }}>
+            <TableCell sx={{ backgroundColor: theme.lightGreen }}>
               <b>Total</b>
             </TableCell>
-            <TableCell sx={{ backgroundColor: THEME.lightGreen }}></TableCell>
+            <TableCell sx={{ backgroundColor: theme.lightGreen }}></TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -171,7 +175,7 @@ const TransactionTable = ({ transactions, onView, onEdit, onDelete }) => {
                 <Button
                   onClick={() => onDelete(transaction)}
                   sx={{
-                    backgroundColor: THEME.green,
+                    backgroundColor: theme.green,
                     borderRadius: 100,
                     height: 34,
                     textTransform: "none",
@@ -184,7 +188,7 @@ const TransactionTable = ({ transactions, onView, onEdit, onDelete }) => {
                 <Button
                   onClick={() => onEdit(transaction)}
                   sx={{
-                    backgroundColor: THEME.green,
+                    backgroundColor: theme.green,
                     borderRadius: 100,
                     height: 34,
                     textTransform: "none",
@@ -197,7 +201,7 @@ const TransactionTable = ({ transactions, onView, onEdit, onDelete }) => {
                 <Button
                   onClick={() => onView(transaction)}
                   sx={{
-                    backgroundColor: THEME.green,
+                    backgroundColor: theme.green,
                     borderRadius: 100,
                     height: 34,
                     textTransform: "none",
@@ -224,14 +228,14 @@ const DeleteConfirmationModal = ({ open, onClose, onConfirm }) => {
       aria-labelledby="delete-confirmation-title"
       aria-describedby="delete-confirmation-description"
     >
-      <Box sx={MODAL_STYLE}>
+      <Box sx={boxStyle}>
         <Typography id="delete-confirmation-title" variant="h6" component="h2">
           Are you sure you want to delete this transaction?
         </Typography>
 
         <Button
           variant="contained"
-          sx={{ mt: 2, mr: 2, backgroundColor: THEME.darkGreen }}
+          sx={{ mt: 2, mr: 2, backgroundColor: theme.darkGreen }}
           onClick={onConfirm}
         >
           Yes
@@ -263,7 +267,7 @@ const TransactionDetailModal = ({
       onClose={onClose}
       aria-labelledby="transaction-detail-title"
     >
-      <Box sx={MODAL_STYLE}>
+      <Box sx={boxStyle}>
         <Typography
           id="transaction-detail-title"
           variant="h6"
@@ -348,7 +352,7 @@ const TransactionDetailModal = ({
 
         <Button
           variant="contained"
-          sx={{ mt: 3, backgroundColor: THEME.green }}
+          sx={{ mt: 3, backgroundColor: theme.green }}
           onClick={onClose}
           fullWidth
         >
@@ -359,48 +363,113 @@ const TransactionDetailModal = ({
   );
 };
 
+const TransactionSchema = z.object({
+  transactionDate: z.string().nonempty("Date is required"),
+  selectedUser: z
+    .object({
+      id: z.string(),
+      fullname: z.string(),
+    })
+    .nullable()
+    .refine((val) => val !== null, {
+      message: "User is required",
+    }),
+  transactionItems: z
+    .array(
+      z.object({
+        waste_product_id: z
+          .object({
+            id: z.string(),
+            waste: z.string(),
+            price: z.number(),
+            unit: z.string().optional(),
+          })
+          .nullable()
+          .refine((val) => val !== null, {
+            message: "Product is required",
+          }),
+        quantity: z
+          .number()
+          .min(1, "Quantity must be at least 1")
+          .or(z.string().transform((val) => parseInt(val) || 0)),
+        subtotal: z.number().optional(),
+      })
+    )
+    .min(1, "At least one product is required"),
+});
+
 const TransactionFormItem = ({
-  item,
   index,
   wasteProducts,
-  onProductChange,
-  onQuantityChange,
+  control,
+  errors,
   onRemove,
   canRemove,
+  calculateSubtotal,
 }) => {
   return (
     <div className="flex gap-2 mb-3 items-center">
-      <Autocomplete
-        options={wasteProducts}
-        getOptionLabel={(option) => option.waste || ""}
-        value={item.waste_product_id}
-        onChange={(e, newValue) => onProductChange(index, newValue)}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            label="Select Waste Product"
-            variant="filled"
-            size="small"
-            fullWidth
+      <Controller
+        name={`transactionItems.${index}.waste_product_id`}
+        control={control}
+        render={({ field }) => (
+          <Autocomplete
+            options={wasteProducts}
+            getOptionLabel={(option) => option.waste || ""}
+            value={field.value}
+            onChange={(e, newValue) => {
+              field.onChange(newValue);
+              calculateSubtotal(index, newValue);
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Select Waste Product"
+                variant="filled"
+                size="small"
+                fullWidth
+                error={!!errors?.transactionItems?.[index]?.waste_product_id}
+                helperText={
+                  errors?.transactionItems?.[index]?.waste_product_id?.message
+                }
+              />
+            )}
+            sx={{ flex: 3 }}
           />
         )}
-        sx={{ flex: 3 }}
       />
 
-      <TextField
-        label="Qty"
-        variant="filled"
-        size="small"
-        type="number"
-        value={item.quantity}
-        onChange={(e) => onQuantityChange(index, e.target.value)}
-        InputProps={{ inputProps: { min: 1 } }}
-        sx={{ flex: 1 }}
+      <Controller
+        name={`transactionItems.${index}.quantity`}
+        control={control}
+        render={({ field }) => (
+          <TextField
+            label="Qty"
+            variant="filled"
+            size="small"
+            type="number"
+            value={field.value}
+            onChange={(e) => {
+              field.onChange(e);
+              calculateSubtotal(index, null, e.target.value);
+            }}
+            InputProps={{ inputProps: { min: 1 } }}
+            sx={{ flex: 1 }}
+            error={!!errors?.transactionItems?.[index]?.quantity}
+            helperText={errors?.transactionItems?.[index]?.quantity?.message}
+          />
+        )}
       />
 
-      <Typography sx={{ flex: 1.5 }}>
-        {formatCurrency.format(item.subtotal)}
-      </Typography>
+      <Controller
+        name={`transactionItems.${index}.subtotal`}
+        control={control}
+        render={({ field }) => (
+          <Typography sx={{ flex: 1.5 }}>
+            {formatCurrency.format(field.value || 0)}
+          </Typography>
+        )}
+      />
 
       <IconButton
         color="error"
@@ -420,66 +489,105 @@ const TransactionFormModal = ({
   users,
   wasteProducts,
   onSave,
-  formData,
-  setFormData,
 }) => {
-  const { selectedUser, transactionItems, transactionDate, transactionTotal } =
-    formData;
+  const {
+    control,
+    handleSubmit,
+    watch,
+    setValue,
+    getValues,
+    reset,
+    formState: { errors, isValid },
+  } = useForm({
+    resolver: zodResolver(TransactionSchema),
+    defaultValues: {
+      transactionDate: new Date().toISOString().split("T")[0],
+      selectedUser: null,
+      transactionItems: [{ waste_product_id: null, quantity: 1, subtotal: 0 }],
+      transactionTotal: 0,
+    },
+  });
 
-  const handleUserChange = (event, newValue) => {
-    setFormData({ ...formData, selectedUser: newValue });
-  };
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "transactionItems",
+  });
 
-  const handleWasteProductChange = (index, newValue) => {
-    const updatedItems = [...transactionItems];
-    updatedItems[index].waste_product_id = newValue;
+  const formValues = watch();
 
-    if (newValue && updatedItems[index].quantity) {
-      updatedItems[index].subtotal =
-        newValue.price * updatedItems[index].quantity;
+  useEffect(() => {
+    const total = formValues.transactionItems.reduce(
+      (sum, item) => sum + (item.subtotal || 0),
+      0
+    );
+    setValue("transactionTotal", total);
+  }, [formValues.transactionItems, setValue]);
+
+  useEffect(() => {
+    if (transaction) {
+      const user = users.find((u) => u.id === transaction.user?.id);
+      const transactionDateObj = transaction.date || new Date();
+      const formattedDate = transactionDateObj.toISOString().split("T")[0];
+
+      let items = [{ waste_product_id: null, quantity: 1, subtotal: 0 }];
+
+      if (transaction.waste_products && transaction.waste_products.length > 0) {
+        items = transaction.waste_products.map((item) => {
+          const wasteProductId = item.waste_product_id?.id;
+          const wasteProduct = wasteProducts.find(
+            (wp) => wp.id === wasteProductId
+          );
+          return {
+            waste_product_id: wasteProduct || null,
+            quantity: item.quantity || 1,
+            subtotal: item.subtotal || 0,
+          };
+        });
+      }
+
+      reset({
+        selectedUser: user || null,
+        transactionItems: items,
+        transactionDate: formattedDate,
+        transactionTotal: transaction.total || 0,
+      });
     } else {
-      updatedItems[index].subtotal = 0;
+      reset({
+        transactionDate: new Date().toISOString().split("T")[0],
+        selectedUser: null,
+        transactionItems: [
+          { waste_product_id: null, quantity: 1, subtotal: 0 },
+        ],
+        transactionTotal: 0,
+      });
     }
+  }, [transaction, users, wasteProducts, reset]);
 
-    setFormData({ ...formData, transactionItems: updatedItems });
-    calculateTotal(updatedItems);
-  };
+  const calculateSubtotal = (index, product = null, quantityValue = null) => {
+    const items = getValues("transactionItems");
+    const item = items[index];
 
-  const handleQuantityChange = (index, value) => {
-    const quantity = Math.max(1, parseInt(value) || 0);
-    const updatedItems = [...transactionItems];
-    updatedItems[index].quantity = quantity;
+    const wasteProduct = product || item.waste_product_id;
+    const quantity =
+      quantityValue !== null ? parseInt(quantityValue) || 0 : item.quantity;
 
-    if (updatedItems[index].waste_product_id) {
-      updatedItems[index].subtotal =
-        updatedItems[index].waste_product_id.price * quantity;
+    if (wasteProduct && quantity > 0) {
+      const subtotal = wasteProduct.price * quantity;
+      setValue(`transactionItems.${index}.subtotal`, subtotal);
     }
-
-    setFormData({ ...formData, transactionItems: updatedItems });
-    calculateTotal(updatedItems);
   };
 
   const addWasteProductItem = () => {
-    setFormData({
-      ...formData,
-      transactionItems: [
-        ...transactionItems,
-        { waste_product_id: null, quantity: 1, subtotal: 0 },
-      ],
-    });
+    append({ waste_product_id: null, quantity: 1, subtotal: 0 });
   };
 
   const removeWasteProductItem = (index) => {
-    if (transactionItems.length <= 1) return;
-
-    const updatedItems = transactionItems.filter((_, i) => i !== index);
-    setFormData({ ...formData, transactionItems: updatedItems });
-    calculateTotal(updatedItems);
+    if (fields.length <= 1) return;
+    remove(index);
   };
 
-  const calculateTotal = (items) => {
-    const total = items.reduce((sum, item) => sum + (item.subtotal || 0), 0);
-    setFormData({ ...formData, transactionTotal: total });
+  const onSubmit = (data) => {
+    onSave(data);
   };
 
   return (
@@ -488,7 +596,7 @@ const TransactionFormModal = ({
       onClose={onClose}
       aria-labelledby="transaction-form-title"
     >
-      <Box sx={MODAL_STYLE}>
+      <Box sx={boxStyle}>
         <Typography
           id="transaction-form-title"
           variant="h6"
@@ -498,76 +606,91 @@ const TransactionFormModal = ({
           {transaction ? "Edit Transaction" : "Add New Transaction"}
         </Typography>
 
-        <div className="flex flex-col gap-4 mb-4">
-          <TextField
-            type="date"
-            label="Transaction Date"
-            InputLabelProps={{ shrink: true }}
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="flex flex-col gap-4 mb-4">
+            <Controller
+              name="transactionDate"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  type="date"
+                  label="Transaction Date"
+                  InputLabelProps={{ shrink: true }}
+                  fullWidth
+                  variant="filled"
+                  size="small"
+                  error={!!errors.transactionDate}
+                  helperText={errors.transactionDate?.message}
+                />
+              )}
+            />
+
+            <Controller
+              name="selectedUser"
+              control={control}
+              render={({ field }) => (
+                <Autocomplete
+                  options={users}
+                  getOptionLabel={(option) => option?.fullname || ""}
+                  value={field.value}
+                  onChange={(_, newValue) => field.onChange(newValue)}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Select User"
+                      variant="filled"
+                      fullWidth
+                      size="small"
+                      error={!!errors.selectedUser}
+                      helperText={errors.selectedUser?.message}
+                    />
+                  )}
+                />
+              )}
+            />
+          </div>
+
+          <Typography variant="h6" sx={{ mb: 2 }}>
+            Waste Products
+          </Typography>
+
+          {fields.map((field, index) => (
+            <TransactionFormItem
+              key={field.id}
+              index={index}
+              wasteProducts={wasteProducts}
+              control={control}
+              errors={errors}
+              onRemove={removeWasteProductItem}
+              canRemove={fields.length > 1}
+              calculateSubtotal={calculateSubtotal}
+            />
+          ))}
+
+          <Button
+            variant="outlined"
+            startIcon={<PlusIcon className="size-5" />}
+            onClick={addWasteProductItem}
             fullWidth
-            value={transactionDate}
-            onChange={(e) =>
-              setFormData({ ...formData, transactionDate: e.target.value })
-            }
-            variant="filled"
-            size="small"
-          />
+            sx={{ mb: 3, mt: 1 }}
+          >
+            Add Item
+          </Button>
 
-          <Autocomplete
-            options={users}
-            getOptionLabel={(option) => option.fullname || ""}
-            value={selectedUser}
-            onChange={handleUserChange}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Select User"
-                variant="filled"
-                fullWidth
-                size="small"
-              />
-            )}
-          />
-        </div>
+          <Typography variant="h6" sx={{ textAlign: "right", mb: 3 }}>
+            Total: {formatCurrency.format(formValues.transactionTotal || 0)}
+          </Typography>
 
-        <Typography variant="h6" sx={{ mb: 2 }}>
-          Waste Products
-        </Typography>
-
-        {transactionItems.map((item, index) => (
-          <TransactionFormItem
-            key={index}
-            item={item}
-            index={index}
-            wasteProducts={wasteProducts}
-            onProductChange={handleWasteProductChange}
-            onQuantityChange={handleQuantityChange}
-            onRemove={removeWasteProductItem}
-            canRemove={transactionItems.length > 1}
-          />
-        ))}
-
-        <Button
-          variant="outlined"
-          startIcon={<PlusIcon className="size-5" />}
-          onClick={addWasteProductItem}
-          fullWidth
-          sx={{ mb: 3, mt: 1 }}
-        >
-          Add Item
-        </Button>
-
-        <Typography variant="h6" sx={{ textAlign: "right", mb: 3 }}>
-          Total: {formatCurrency.format(transactionTotal)}
-        </Typography>
-
-        <Button
-          variant="contained"
-          sx={{ backgroundColor: THEME.green }}
-          onClick={onSave}
-          fullWidth
-        >
-          {transaction ? "Update Transaction" : "Create Transaction"}
-        </Button>
+          <Button
+            type="submit"
+            variant="contained"
+            sx={{ backgroundColor: theme.green }}
+            fullWidth
+          >
+            {transaction ? "Update Transaction" : "Create Transaction"}
+          </Button>
+        </form>
       </Box>
     </Modal>
   );
@@ -577,21 +700,21 @@ const TransactionsManagement = () => {
   const [transactions, setTransactions] = useState([]);
   const [wasteProducts, setWasteProducts] = useState([]);
   const [users, setUsers] = useState([]);
-
   const [searchQuery, setSearchQuery] = useState("");
 
-  const [detailModalOpen, setDetailModalOpen] = useState(false);
-  const [detailTransaction, setDetailTransaction] = useState(null);
-  const [formModalOpen, setFormModalOpen] = useState(false);
-  const [editingTransaction, setEditingTransaction] = useState(null);
-  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [viewModalState, setViewModalState] = useState({
+    isOpen: false,
+    transaction: null,
+  });
 
-  const [formData, setFormData] = useState({
-    selectedUser: null,
-    transactionItems: [{ waste_product_id: null, quantity: 1, subtotal: 0 }],
-    transactionDate: new Date().toISOString().split("T")[0],
-    transactionTotal: 0,
+  const [formModalState, setFormModalState] = useState({
+    isOpen: false,
+    transaction: null,
+  });
+
+  const [deleteModalState, setDeleteModalState] = useState({
+    isOpen: false,
+    transaction: null,
   });
 
   const fetchTransactions = async () => {
@@ -658,94 +781,62 @@ const TransactionsManagement = () => {
     }
   };
 
-  const handleViewDetail = (transaction) => {
-    setDetailTransaction(transaction);
-    setDetailModalOpen(true);
-  };
-
-  const handleEdit = (transaction) => {
-    setEditingTransaction(transaction);
-
-    const user = users.find((u) => u.id === transaction.user?.id);
-
-    const transactionDateObj = transaction.date || new Date();
-    const formattedDate = transactionDateObj.toISOString().split("T")[0];
-
-    let items = [{ waste_product_id: null, quantity: 1, subtotal: 0 }];
-
-    if (transaction.waste_products && transaction.waste_products.length > 0) {
-      items = transaction.waste_products.map((item) => {
-        const wasteProductId = item.waste_product_id?.id;
-        const wasteProduct = wasteProducts.find(
-          (wp) => wp.id === wasteProductId
-        );
-        return {
-          waste_product_id: wasteProduct || null,
-          quantity: item.quantity || 1,
-          subtotal: item.subtotal || 0,
-        };
-      });
-    }
-
-    setFormData({
-      selectedUser: user || null,
-      transactionItems: items,
-      transactionDate: formattedDate,
-      transactionTotal: transaction.total || 0,
+  const handleViewTransaction = (transaction) => {
+    setViewModalState({
+      isOpen: true,
+      transaction,
     });
-
-    setFormModalOpen(true);
   };
 
-  const handleOpenAddForm = () => {
-    setFormData({
-      selectedUser: null,
-      transactionItems: [{ waste_product_id: null, quantity: 1, subtotal: 0 }],
-      transactionDate: new Date().toISOString().split("T")[0],
-      transactionTotal: 0,
+  const closeViewModal = () => {
+    setViewModalState({
+      isOpen: false,
+      transaction: null,
     });
-
-    setEditingTransaction(null);
-    setFormModalOpen(true);
   };
 
-  const handleDeleteClick = (transaction) => {
-    setDeleteTarget(transaction);
-    setConfirmModalOpen(true);
+  const handleAddTransaction = () => {
+    setFormModalState({
+      isOpen: true,
+      transaction: null,
+    });
   };
 
-  const handleDelete = async () => {
-    if (!deleteTarget) return;
-
-    try {
-      await deleteDoc(doc(db, "transactions", deleteTarget.id));
-
-      setTransactions((prevTransactions) =>
-        prevTransactions.filter((item) => item.id !== deleteTarget.id)
-      );
-
-      setDeleteTarget(null);
-      setConfirmModalOpen(false);
-    } catch (error) {
-      console.error("Error deleting transaction:", error);
-    }
+  const handleEditTransaction = (transaction) => {
+    setFormModalState({
+      isOpen: true,
+      transaction,
+    });
   };
 
-  const handleSaveTransaction = async () => {
+  const closeFormModal = () => {
+    setFormModalState({
+      isOpen: false,
+      transaction: null,
+    });
+  };
+
+  const handleDeleteTransaction = (transaction) => {
+    setDeleteModalState({
+      isOpen: true,
+      transaction,
+    });
+  };
+
+  const closeDeleteModal = () => {
+    setDeleteModalState({
+      isOpen: false,
+      transaction: null,
+    });
+  };
+
+  const handleSaveTransaction = async (data) => {
     const {
       selectedUser,
       transactionItems,
       transactionDate,
       transactionTotal,
-    } = formData;
-
-    if (
-      !selectedUser ||
-      transactionItems.some((item) => !item.waste_product_id)
-    ) {
-      alert("Please select a user and waste products for all items");
-      return;
-    }
+    } = data;
 
     try {
       const transactionData = {
@@ -759,20 +850,38 @@ const TransactionsManagement = () => {
         })),
       };
 
-      if (editingTransaction) {
+      if (formModalState.transaction) {
         await updateDoc(
-          doc(db, "transactions", editingTransaction.id),
+          doc(db, "transactions", formModalState.transaction.id),
           transactionData
         );
       } else {
         await addDoc(collection(db, "transactions"), transactionData);
       }
 
-      setFormModalOpen(false);
+      closeFormModal();
       fetchTransactions();
     } catch (error) {
       console.error("Error saving transaction:", error);
       alert("Error saving transaction: " + error.message);
+    }
+  };
+
+  const confirmDeleteTransaction = async () => {
+    if (!deleteModalState.transaction) return;
+
+    try {
+      await deleteDoc(doc(db, "transactions", deleteModalState.transaction.id));
+
+      setTransactions((prevTransactions) =>
+        prevTransactions.filter(
+          (item) => item.id !== deleteModalState.transaction.id
+        )
+      );
+
+      closeDeleteModal();
+    } catch (error) {
+      console.error("Error deleting transaction:", error);
     }
   };
 
@@ -799,46 +908,41 @@ const TransactionsManagement = () => {
       >
         <Sidebar />
         <div className="w-full py-4 h-screen">
-          {/* Header section */}
           <TransactionHeader
-            onAddClick={handleOpenAddForm}
+            onAddClick={handleAddTransaction}
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
           />
 
-          {/* Transaction table */}
           <TransactionTable
             transactions={filteredTransactions}
-            onView={handleViewDetail}
-            onEdit={handleEdit}
-            onDelete={handleDeleteClick}
+            onView={handleViewTransaction}
+            onEdit={handleEditTransaction}
+            onDelete={handleDeleteTransaction}
           />
         </div>
       </div>
 
-      {/* Modals */}
       <DeleteConfirmationModal
-        open={confirmModalOpen}
-        onClose={() => setConfirmModalOpen(false)}
-        onConfirm={handleDelete}
+        open={deleteModalState.isOpen}
+        onClose={closeDeleteModal}
+        onConfirm={confirmDeleteTransaction}
       />
 
       <TransactionDetailModal
-        open={detailModalOpen}
-        onClose={() => setDetailModalOpen(false)}
-        transaction={detailTransaction}
+        open={viewModalState.isOpen}
+        onClose={closeViewModal}
+        transaction={viewModalState.transaction}
         wasteProducts={wasteProducts}
       />
 
       <TransactionFormModal
-        open={formModalOpen}
-        onClose={() => setFormModalOpen(false)}
-        transaction={editingTransaction}
+        open={formModalState.isOpen}
+        onClose={closeFormModal}
+        transaction={formModalState.transaction}
         users={users}
         wasteProducts={wasteProducts}
         onSave={handleSaveTransaction}
-        formData={formData}
-        setFormData={setFormData}
       />
     </>
   );
