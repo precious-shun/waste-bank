@@ -27,7 +27,6 @@ import {
   MenuItem,
   IconButton,
   Autocomplete,
-  FormHelperText,
 } from "@mui/material";
 
 import { db } from "../../firebase";
@@ -125,7 +124,13 @@ const TransactionHeader = ({ onAddClick, searchQuery, onSearchChange }) => {
   );
 };
 
-const TransactionTable = ({ transactions, onView, onEdit, onDelete }) => {
+const TransactionTable = ({
+  isLoading,
+  transactions,
+  onView,
+  onEdit,
+  onDelete,
+}) => {
   return (
     <TableContainer
       elevation="0"
@@ -156,74 +161,88 @@ const TransactionTable = ({ transactions, onView, onEdit, onDelete }) => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {transactions.map((transaction, index) => (
-            <TableRow key={index}>
-              <TableCell>
-                {transaction.date
-                  ? transaction.date.toLocaleDateString("id-ID", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })
-                  : "-"}
-              </TableCell>
-              <TableCell>{transaction.user?.fullname || "-"}</TableCell>
-              <TableCell>
-                {formatCurrency.format(transaction.total || 0)}
-              </TableCell>
-              <TableCell align="right" sx={{ display: "flex", gap: 1 }}>
-                <Button
-                  onClick={() => onDelete(transaction)}
-                  sx={{
-                    backgroundColor: theme.green,
-                    borderRadius: 100,
-                    height: 34,
-                    textTransform: "none",
-                  }}
-                  variant="contained"
-                >
-                  <TrashIcon className="size-5" />
-                  <span className="ms-1.5 mt-0.5">Delete</span>
-                </Button>
-                <Button
-                  onClick={() => onEdit(transaction)}
-                  sx={{
-                    backgroundColor: theme.green,
-                    borderRadius: 100,
-                    height: 34,
-                    textTransform: "none",
-                  }}
-                  variant="contained"
-                >
-                  <PencilSquareIcon className="size-5" />
-                  <span className="ms-1.5 mt-0.5">Edit</span>
-                </Button>
-                <Button
-                  onClick={() => onView(transaction)}
-                  sx={{
-                    backgroundColor: theme.green,
-                    borderRadius: 100,
-                    height: 34,
-                    textTransform: "none",
-                  }}
-                  variant="contained"
-                >
-                  <EyeIcon className="size-5" />
-                  <span className="ms-1.5 mt-0.5">View</span>
-                </Button>
+          {isLoading ? (
+            <TableRow>
+              <TableCell colSpan={4} align="center">
+                Loading...
               </TableCell>
             </TableRow>
-          ))}
+          ) : transactions.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={4} align="center">
+                No transactions found
+              </TableCell>
+            </TableRow>
+          ) : (
+            transactions.map((transaction, index) => (
+              <TableRow key={index}>
+                <TableCell>
+                  {transaction.date
+                    ? transaction.date.toLocaleDateString("id-ID", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })
+                    : "-"}
+                </TableCell>
+                <TableCell>{transaction.user?.fullname || "-"}</TableCell>
+                <TableCell>
+                  {formatCurrency.format(transaction.total || 0)}
+                </TableCell>
+                <TableCell align="right" sx={{ display: "flex", gap: 1 }}>
+                  <Button
+                    onClick={() => onDelete(transaction)}
+                    sx={{
+                      backgroundColor: theme.green,
+                      borderRadius: 100,
+                      height: 34,
+                      textTransform: "none",
+                    }}
+                    variant="contained"
+                  >
+                    <TrashIcon className="size-5" />
+                    <span className="ms-1.5 mt-0.5">Delete</span>
+                  </Button>
+                  <Button
+                    onClick={() => onEdit(transaction)}
+                    sx={{
+                      backgroundColor: theme.green,
+                      borderRadius: 100,
+                      height: 34,
+                      textTransform: "none",
+                    }}
+                    variant="contained"
+                  >
+                    <PencilSquareIcon className="size-5" />
+                    <span className="ms-1.5 mt-0.5">Edit</span>
+                  </Button>
+                  <Button
+                    onClick={() => onView(transaction)}
+                    sx={{
+                      backgroundColor: theme.green,
+                      borderRadius: 100,
+                      height: 34,
+                      textTransform: "none",
+                    }}
+                    variant="contained"
+                  >
+                    <EyeIcon className="size-5" />
+                    <span className="ms-1.5 mt-0.5">View</span>
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))
+          )}
         </TableBody>
       </Table>
     </TableContainer>
   );
 };
 
-const DeleteConfirmationModal = ({ open, onClose, onConfirm }) => {
+const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm }) => {
   return (
     <Modal
-      open={open}
+      open={isOpen}
       onClose={onClose}
       aria-labelledby="delete-confirmation-title"
       aria-describedby="delete-confirmation-description"
@@ -254,7 +273,7 @@ const DeleteConfirmationModal = ({ open, onClose, onConfirm }) => {
 };
 
 const TransactionDetailModal = ({
-  open,
+  isOpen,
   onClose,
   transaction,
   wasteProducts,
@@ -263,7 +282,7 @@ const TransactionDetailModal = ({
 
   return (
     <Modal
-      open={open}
+      open={isOpen}
       onClose={onClose}
       aria-labelledby="transaction-detail-title"
     >
@@ -400,13 +419,26 @@ const TransactionSchema = z.object({
 
 const TransactionFormItem = ({
   index,
-  wasteProducts,
   control,
+  wasteProducts,
   errors,
   onRemove,
   canRemove,
-  calculateSubtotal,
+  register,
+  setValue,
+  getValues,
+  watch,
 }) => {
+  const currentProduct = watch(`transactionItems.${index}.waste_product_id`);
+  const currentQuantity = watch(`transactionItems.${index}.quantity`);
+
+  useEffect(() => {
+    if (currentProduct && currentQuantity) {
+      const subtotal = currentProduct.price * parseInt(currentQuantity);
+      setValue(`transactionItems.${index}.subtotal`, subtotal);
+    }
+  }, [currentProduct, currentQuantity, setValue, index]);
+
   return (
     <div className="flex gap-2 mb-3 items-center">
       <Controller
@@ -415,12 +447,9 @@ const TransactionFormItem = ({
         render={({ field }) => (
           <Autocomplete
             options={wasteProducts}
-            getOptionLabel={(option) => option.waste || ""}
+            getOptionLabel={(option) => option?.waste || ""}
             value={field.value}
-            onChange={(e, newValue) => {
-              field.onChange(newValue);
-              calculateSubtotal(index, newValue);
-            }}
+            onChange={(_, newValue) => field.onChange(newValue)}
             renderInput={(params) => (
               <TextField
                 {...params}
@@ -444,15 +473,11 @@ const TransactionFormItem = ({
         control={control}
         render={({ field }) => (
           <TextField
+            {...field}
             label="Qty"
             variant="filled"
             size="small"
             type="number"
-            value={field.value}
-            onChange={(e) => {
-              field.onChange(e);
-              calculateSubtotal(index, null, e.target.value);
-            }}
             InputProps={{ inputProps: { min: 1 } }}
             sx={{ flex: 1 }}
             error={!!errors?.transactionItems?.[index]?.quantity}
@@ -461,15 +486,11 @@ const TransactionFormItem = ({
         )}
       />
 
-      <Controller
-        name={`transactionItems.${index}.subtotal`}
-        control={control}
-        render={({ field }) => (
-          <Typography sx={{ flex: 1.5 }}>
-            {formatCurrency.format(field.value || 0)}
-          </Typography>
+      <Typography sx={{ flex: 1.5 }}>
+        {formatCurrency.format(
+          getValues(`transactionItems.${index}.subtotal`) || 0
         )}
-      />
+      </Typography>
 
       <IconButton
         color="error"
@@ -483,28 +504,28 @@ const TransactionFormItem = ({
 };
 
 const TransactionFormModal = ({
-  open,
+  isOpen,
   onClose,
-  transaction,
+  initialData,
   users,
   wasteProducts,
-  onSave,
+  onSubmit,
 }) => {
   const {
     control,
     handleSubmit,
-    watch,
+    reset,
+    register,
     setValue,
     getValues,
-    reset,
-    formState: { errors, isValid },
+    watch,
+    formState: { errors },
   } = useForm({
     resolver: zodResolver(TransactionSchema),
     defaultValues: {
       transactionDate: new Date().toISOString().split("T")[0],
       selectedUser: null,
       transactionItems: [{ waste_product_id: null, quantity: 1, subtotal: 0 }],
-      transactionTotal: 0,
     },
   });
 
@@ -513,26 +534,22 @@ const TransactionFormModal = ({
     name: "transactionItems",
   });
 
-  const formValues = watch();
+  const transactionItems = watch("transactionItems");
+  const transactionTotal = transactionItems.reduce(
+    (sum, item) => sum + (item.subtotal || 0),
+    0
+  );
 
   useEffect(() => {
-    const total = formValues.transactionItems.reduce(
-      (sum, item) => sum + (item.subtotal || 0),
-      0
-    );
-    setValue("transactionTotal", total);
-  }, [formValues.transactionItems, setValue]);
-
-  useEffect(() => {
-    if (transaction) {
-      const user = users.find((u) => u.id === transaction.user?.id);
-      const transactionDateObj = transaction.date || new Date();
+    if (initialData) {
+      const user = users.find((u) => u.id === initialData.user?.id);
+      const transactionDateObj = initialData.date || new Date();
       const formattedDate = transactionDateObj.toISOString().split("T")[0];
 
       let items = [{ waste_product_id: null, quantity: 1, subtotal: 0 }];
 
-      if (transaction.waste_products && transaction.waste_products.length > 0) {
-        items = transaction.waste_products.map((item) => {
+      if (initialData.waste_products && initialData.waste_products.length > 0) {
+        items = initialData.waste_products.map((item) => {
           const wasteProductId = item.waste_product_id?.id;
           const wasteProduct = wasteProducts.find(
             (wp) => wp.id === wasteProductId
@@ -546,10 +563,9 @@ const TransactionFormModal = ({
       }
 
       reset({
+        transactionDate: formattedDate,
         selectedUser: user || null,
         transactionItems: items,
-        transactionDate: formattedDate,
-        transactionTotal: transaction.total || 0,
       });
     } else {
       reset({
@@ -558,41 +574,30 @@ const TransactionFormModal = ({
         transactionItems: [
           { waste_product_id: null, quantity: 1, subtotal: 0 },
         ],
-        transactionTotal: 0,
       });
     }
-  }, [transaction, users, wasteProducts, reset]);
-
-  const calculateSubtotal = (index, product = null, quantityValue = null) => {
-    const items = getValues("transactionItems");
-    const item = items[index];
-
-    const wasteProduct = product || item.waste_product_id;
-    const quantity =
-      quantityValue !== null ? parseInt(quantityValue) || 0 : item.quantity;
-
-    if (wasteProduct && quantity > 0) {
-      const subtotal = wasteProduct.price * quantity;
-      setValue(`transactionItems.${index}.subtotal`, subtotal);
-    }
-  };
+  }, [initialData, reset, users, wasteProducts]);
 
   const addWasteProductItem = () => {
     append({ waste_product_id: null, quantity: 1, subtotal: 0 });
   };
 
   const removeWasteProductItem = (index) => {
-    if (fields.length <= 1) return;
-    remove(index);
+    if (fields.length > 1) {
+      remove(index);
+    }
   };
 
-  const onSubmit = (data) => {
-    onSave(data);
+  const submitHandler = (data) => {
+    onSubmit({
+      ...data,
+      transactionTotal,
+    });
   };
 
   return (
     <Modal
-      open={open}
+      open={isOpen}
       onClose={onClose}
       aria-labelledby="transaction-form-title"
     >
@@ -603,10 +608,10 @@ const TransactionFormModal = ({
           component="h2"
           sx={{ mb: 3 }}
         >
-          {transaction ? "Edit Transaction" : "Add New Transaction"}
+          {initialData ? "Edit Transaction" : "Add New Transaction"}
         </Typography>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={handleSubmit(submitHandler)}>
           <div className="flex flex-col gap-4 mb-4">
             <Controller
               name="transactionDate"
@@ -659,14 +664,23 @@ const TransactionFormModal = ({
             <TransactionFormItem
               key={field.id}
               index={index}
-              wasteProducts={wasteProducts}
               control={control}
+              wasteProducts={wasteProducts}
               errors={errors}
               onRemove={removeWasteProductItem}
               canRemove={fields.length > 1}
-              calculateSubtotal={calculateSubtotal}
+              register={register}
+              setValue={setValue}
+              getValues={getValues}
+              watch={watch}
             />
           ))}
+
+          {errors.transactionItems && (
+            <Typography color="error" variant="body2" sx={{ mt: 1 }}>
+              {errors.transactionItems.message}
+            </Typography>
+          )}
 
           <Button
             variant="outlined"
@@ -679,7 +693,7 @@ const TransactionFormModal = ({
           </Button>
 
           <Typography variant="h6" sx={{ textAlign: "right", mb: 3 }}>
-            Total: {formatCurrency.format(formValues.transactionTotal || 0)}
+            Total: {formatCurrency.format(transactionTotal)}
           </Typography>
 
           <Button
@@ -688,7 +702,7 @@ const TransactionFormModal = ({
             sx={{ backgroundColor: theme.green }}
             fullWidth
           >
-            {transaction ? "Update Transaction" : "Create Transaction"}
+            {initialData ? "Update Transaction" : "Create Transaction"}
           </Button>
         </form>
       </Box>
@@ -700,24 +714,26 @@ const TransactionsManagement = () => {
   const [transactions, setTransactions] = useState([]);
   const [wasteProducts, setWasteProducts] = useState([]);
   const [users, setUsers] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-
-  const [viewModalState, setViewModalState] = useState({
-    isOpen: false,
-    transaction: null,
-  });
 
   const [formModalState, setFormModalState] = useState({
     isOpen: false,
-    transaction: null,
+    currentTransaction: null,
+  });
+
+  const [detailModalState, setDetailModalState] = useState({
+    isOpen: false,
+    currentTransaction: null,
   });
 
   const [deleteModalState, setDeleteModalState] = useState({
     isOpen: false,
-    transaction: null,
+    transactionToDelete: null,
   });
 
   const fetchTransactions = async () => {
+    setIsLoading(true);
     try {
       const transactionsSnapshot = await getDocs(
         collection(db, "transactions")
@@ -748,6 +764,8 @@ const TransactionsManagement = () => {
       setTransactions(transactionsData);
     } catch (error) {
       console.error("Error fetching transactions:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -781,62 +799,62 @@ const TransactionsManagement = () => {
     }
   };
 
-  const handleViewTransaction = (transaction) => {
-    setViewModalState({
+  const handleViewDetail = (transaction) => {
+    setDetailModalState({
       isOpen: true,
-      transaction,
+      currentTransaction: transaction,
     });
   };
 
-  const closeViewModal = () => {
-    setViewModalState({
+  const handleCloseDetailModal = () => {
+    setDetailModalState({
       isOpen: false,
-      transaction: null,
+      currentTransaction: null,
     });
   };
 
-  const handleAddTransaction = () => {
+  const handleAddClick = () => {
     setFormModalState({
       isOpen: true,
-      transaction: null,
+      currentTransaction: null,
     });
   };
 
-  const handleEditTransaction = (transaction) => {
+  const handleEditClick = (transaction) => {
     setFormModalState({
       isOpen: true,
-      transaction,
+      currentTransaction: transaction,
     });
   };
 
-  const closeFormModal = () => {
+  const handleCloseFormModal = () => {
     setFormModalState({
       isOpen: false,
-      transaction: null,
+      currentTransaction: null,
     });
   };
 
-  const handleDeleteTransaction = (transaction) => {
+  const handleDeleteClick = (transaction) => {
     setDeleteModalState({
       isOpen: true,
-      transaction,
+      transactionToDelete: transaction,
     });
   };
 
-  const closeDeleteModal = () => {
+  const handleCloseDeleteModal = () => {
     setDeleteModalState({
       isOpen: false,
-      transaction: null,
+      transactionToDelete: null,
     });
   };
 
-  const handleSaveTransaction = async (data) => {
+  const handleSubmitTransaction = async (formData) => {
     const {
       selectedUser,
       transactionItems,
       transactionDate,
       transactionTotal,
-    } = data;
+    } = formData;
 
     try {
       const transactionData = {
@@ -850,36 +868,37 @@ const TransactionsManagement = () => {
         })),
       };
 
-      if (formModalState.transaction) {
+      if (formModalState.currentTransaction) {
         await updateDoc(
-          doc(db, "transactions", formModalState.transaction.id),
+          doc(db, "transactions", formModalState.currentTransaction.id),
           transactionData
         );
       } else {
         await addDoc(collection(db, "transactions"), transactionData);
       }
 
-      closeFormModal();
+      handleCloseFormModal();
       fetchTransactions();
     } catch (error) {
       console.error("Error saving transaction:", error);
-      alert("Error saving transaction: " + error.message);
     }
   };
 
-  const confirmDeleteTransaction = async () => {
-    if (!deleteModalState.transaction) return;
+  const handleConfirmDelete = async () => {
+    if (!deleteModalState.transactionToDelete) return;
 
     try {
-      await deleteDoc(doc(db, "transactions", deleteModalState.transaction.id));
+      await deleteDoc(
+        doc(db, "transactions", deleteModalState.transactionToDelete.id)
+      );
 
       setTransactions((prevTransactions) =>
         prevTransactions.filter(
-          (item) => item.id !== deleteModalState.transaction.id
+          (item) => item.id !== deleteModalState.transactionToDelete.id
         )
       );
 
-      closeDeleteModal();
+      handleCloseDeleteModal();
     } catch (error) {
       console.error("Error deleting transaction:", error);
     }
@@ -909,40 +928,41 @@ const TransactionsManagement = () => {
         <Sidebar />
         <div className="w-full py-4 h-screen">
           <TransactionHeader
-            onAddClick={handleAddTransaction}
+            onAddClick={handleAddClick}
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
           />
 
           <TransactionTable
+            isLoading={isLoading}
             transactions={filteredTransactions}
-            onView={handleViewTransaction}
-            onEdit={handleEditTransaction}
-            onDelete={handleDeleteTransaction}
+            onView={handleViewDetail}
+            onEdit={handleEditClick}
+            onDelete={handleDeleteClick}
           />
         </div>
       </div>
 
       <DeleteConfirmationModal
-        open={deleteModalState.isOpen}
-        onClose={closeDeleteModal}
-        onConfirm={confirmDeleteTransaction}
+        isOpen={deleteModalState.isOpen}
+        onClose={handleCloseDeleteModal}
+        onConfirm={handleConfirmDelete}
       />
 
       <TransactionDetailModal
-        open={viewModalState.isOpen}
-        onClose={closeViewModal}
-        transaction={viewModalState.transaction}
+        isOpen={detailModalState.isOpen}
+        onClose={handleCloseDetailModal}
+        transaction={detailModalState.currentTransaction}
         wasteProducts={wasteProducts}
       />
 
       <TransactionFormModal
-        open={formModalState.isOpen}
-        onClose={closeFormModal}
-        transaction={formModalState.transaction}
+        isOpen={formModalState.isOpen}
+        onClose={handleCloseFormModal}
+        initialData={formModalState.currentTransaction}
         users={users}
         wasteProducts={wasteProducts}
-        onSave={handleSaveTransaction}
+        onSubmit={handleSubmitTransaction}
       />
     </>
   );
