@@ -2,6 +2,7 @@ import { AppBar, Toolbar, Button, Box } from "@mui/material";
 import Logo from "../assets/logo.svg";
 import { useAuth } from "../context/AuthContext";
 import { useLocation, useNavigate } from "react-router-dom";
+import NotificationBell from "./NotificationBell";
 
 const colors = {
   darkGreen: "#2C514B",
@@ -70,21 +71,24 @@ const Navbar = () => {
         </Box>
 
         {/* Right Side: Logout Button */}
-        <Button
-          onClick={handleLogout}
-          sx={{
-            backgroundColor: colors.orange,
-            color: colors.white,
-            borderRadius: "20px",
-            padding: "6px 16px",
-            fontWeight: "bold",
-            "&:hover": {
-              backgroundColor: colors.green,
-            },
-          }}
-        >
-          Logout
-        </Button>
+        <div className="space-x-4">
+          <NotificationBell />
+          <Button
+            onClick={handleLogout}
+            sx={{
+              backgroundColor: colors.orange,
+              color: colors.white,
+              borderRadius: "20px",
+              padding: "6px 16px",
+              fontWeight: "bold",
+              "&:hover": {
+                backgroundColor: colors.green,
+              },
+            }}
+          >
+            Logout
+          </Button>
+        </div>
       </Toolbar>
     </AppBar>
   );
