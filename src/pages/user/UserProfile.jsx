@@ -1,10 +1,19 @@
-import { Avatar, Button, Divider, TextField } from "@mui/material";
+import {
+  Avatar,
+  Button,
+  Divider,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  TextField,
+} from "@mui/material";
 import Navbar from "../../components/Navbar";
 import { theme } from "../../theme";
 import { useAuth } from "../../context/AuthContext";
 import { useState, useEffect } from "react";
 import { db } from "../../firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 
 const UserProfile = () => {
   const { user } = useAuth();
@@ -14,6 +23,12 @@ const UserProfile = () => {
     email: "",
     gender: "",
   });
+
+  const [fullname, setFullname] = useState("");
+  const [address, setAddress] = useState("");
+  const [email, setEmail] = useState("");
+  const [gender, setGender] = useState("");
+  const [openDialog, setOpenDialog] = useState(false);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -28,6 +43,28 @@ const UserProfile = () => {
 
     fetchUserProfile();
   }, [user]);
+
+  //handle update
+  const handleUpdate = async () => {
+    if (!currentUser) return alert("No user logged in!");
+
+    const userRef = doc(db, "users", currentUser.uid);
+
+    try {
+      await updateDoc(userRef, {
+        fullname,
+        address,
+        email,
+        gender,
+      });
+      alert("Profile updated successfully!");
+    } catch (error) {
+      console.error("Error updating profile: ", error);
+      alert("Failed to update profile.");
+    }
+
+    setOpenDialog(false); // Close dialog after updating
+  };
 
   return (
     <>
@@ -47,6 +84,7 @@ const UserProfile = () => {
               <TextField
                 fullWidth
                 size="small"
+                onChange={(e) => setFullname(e.target.value)}
                 defaultValue={profile?.fullname || ""}
               />
             </div>
@@ -56,6 +94,7 @@ const UserProfile = () => {
               <TextField
                 fullWidth
                 size="small"
+                onChange={(e) => setAddress(e.target.value)}
                 defaultValue={profile?.address || ""}
               />
             </div>
@@ -65,6 +104,7 @@ const UserProfile = () => {
               <TextField
                 fullWidth
                 size="small"
+                onChange={(e) => setEmail(e.target.value)}
                 defaultValue={profile?.email || ""}
               />
             </div>
@@ -74,6 +114,7 @@ const UserProfile = () => {
               <TextField
                 fullWidth
                 size="small"
+                onChange={(e) => setGender(e.target.value)}
                 defaultValue={profile?.gender || ""}
               />
             </div>
@@ -84,11 +125,27 @@ const UserProfile = () => {
                 textTransform: "none",
                 backgroundColor: theme.green,
               }}
+              onClick={() => setOpenDialog(true)}
             >
               Update Profile
             </Button>
           </div>
         </div>
+
+        <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+          <DialogTitle>Confirm Update</DialogTitle>
+          <DialogContent>
+            Are you sure you want to update your profile?
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setOpenDialog(false)} color="secondary">
+              Cancel
+            </Button>
+            <Button onClick={handleUpdate} color="primary">
+              Yes, Update
+            </Button>
+          </DialogActions>
+        </Dialog>
       </div>
     </>
   );

@@ -93,7 +93,7 @@ const NotificationBell = () => {
         className="text-gray-700"
       >
         <Badge badgeContent={unreadCount} color="error">
-          <BellIcon className="h-6 w-6 text-orange-500" />
+          <BellIcon className="h-6 w-6" style={{ color: "#D66C42" }} />
         </Badge>
       </IconButton>
       {open && (
