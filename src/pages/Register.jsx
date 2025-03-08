@@ -68,7 +68,7 @@ const Register = () => {
 
               <TextField sx={inputStyle} fullWidth label="Full Name" variant="outlined" {...register("fullname")} error={!!errors.fullname} helperText={errors.fullname?.message} />
 
-              <TextField sx={inputStyle} fullWidth select label="Gender" variant="outlined" {...register("gender")} error={!!errors.gender} helperText={errors.gender?.message}>
+              <TextField value={""} sx={inputStyle} fullWidth select label="Gender" variant="outlined" {...register("gender")} error={!!errors.gender} helperText={errors.gender?.message}>
                 <MenuItem value="Male">Male</MenuItem>
                 <MenuItem value="Female">Female</MenuItem>
               </TextField>

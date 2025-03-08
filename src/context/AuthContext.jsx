@@ -12,9 +12,9 @@ export function AuthProvider({ children }) {
   // Track authentication state and handle navigation
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        navigate("/"); // Redirect to home if user logs out
-      } else {
+      if (user) {
+       // Redirect to home if user logs out
+    
         setUser(user); // Set user state when logged in
       }
     });
