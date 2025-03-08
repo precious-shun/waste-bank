@@ -7,6 +7,7 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import { useEffect, useState } from "react";
 import { db } from "../../firebase";
+import { EyeIcon } from "@heroicons/react/24/solid";
 import {
   collection,
   query,
@@ -15,7 +16,15 @@ import {
   doc,
   getDoc,
 } from "firebase/firestore";
-import { Box, Button, ListItem, ListItemText } from "@mui/material";
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Typography,
+} from "@mui/material";
 import Navbar from "../../components/Navbar";
 import { useAuth } from "../../context/AuthContext";
 
@@ -88,7 +97,6 @@ function TransactionHistory() {
           });
         }
 
-        // Sort transactions from latest to earliest
         transactionsList.sort((a, b) => b.date - a.date);
 
         setTransactions(transactionsList);
@@ -141,10 +149,7 @@ function TransactionHistory() {
                     })}
                   </TableCell>
                   <TableCell>
-                    Rp{" "}
-                    {transaction.waste_products
-                      .reduce((sum, item) => sum + item.subtotal, 0)
-                      .toLocaleString("id-ID")}
+                    Rp {transaction.total.toLocaleString("id-ID")}
                   </TableCell>
                   <TableCell>
                     {transaction.waste_products.reduce(
@@ -164,7 +169,8 @@ function TransactionHistory() {
                       }}
                       variant="contained"
                     >
-                      View
+                      <EyeIcon className="size-5" />
+                      <span className="ms-1.5 mt-0.5">View</span>
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -173,34 +179,65 @@ function TransactionHistory() {
           </Table>
         </TableContainer>
 
-        {selectedTransaction && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white p-6 rounded-2xl w-96">
-              <h3 className="text-lg font-semibold mb-4">
-                Transaction Details
-              </h3>
-              <ul className="mb-4">
-                {selectedTransaction.waste_products.map((product, idx) => (
-                  <ListItem
-                    key={idx}
-                    sx={{ display: "flex", justifyContent: "space-between" }}
-                  >
-                    <ListItemText
-                      primary={`${product.waste} (x${product.quantity})`}
-                      secondary={`Subtotal: Rp ${product.subtotal.toLocaleString("id-ID")}`}
-                    />
-                  </ListItem>
-                ))}
-              </ul>
-              <button
-                onClick={() => setSelectedTransaction(null)}
-                className="bg-green-900 rounded-xl text-white px-4 py-2 mt-4"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        )}
+        <Dialog
+          open={!!selectedTransaction}
+          onClose={() => setSelectedTransaction(null)}
+        >
+          <DialogTitle>Transaction Details</DialogTitle>
+          <DialogContent>
+            {selectedTransaction && (
+              <>
+                <Typography>
+                  Date: {selectedTransaction.date.toLocaleDateString("id-ID")}
+                </Typography>
+                <Typography>
+                  Total Balance: Rp{" "}
+                  {selectedTransaction.total.toLocaleString("id-ID")}
+                </Typography>
+                <Typography>
+                  Total Waste:{" "}
+                  {selectedTransaction.waste_products.reduce(
+                    (sum, item) => sum + item.quantity,
+                    0
+                  )}{" "}
+                  Kg
+                </Typography>
+                <TableContainer component={Paper}>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Waste Product</TableCell>
+                        <TableCell>Quantity</TableCell>
+                        <TableCell>Subtotal</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {selectedTransaction.waste_products.map(
+                        (product, idx) => (
+                          <TableRow key={idx}>
+                            <TableCell>{product.waste}</TableCell>
+                            <TableCell>{product.quantity} Kg</TableCell>
+                            <TableCell>
+                              Rp {product.subtotal.toLocaleString("id-ID")}
+                            </TableCell>
+                          </TableRow>
+                        )
+                      )}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={() => setSelectedTransaction(null)}
+              color="primary"
+            >
+              Close
+            </Button>
+          </DialogActions>
+        </Dialog>
       </div>
     </Box>
   );
