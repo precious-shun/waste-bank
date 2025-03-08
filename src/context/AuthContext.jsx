@@ -2,21 +2,25 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { signOut, onAuthStateChanged } from "firebase/auth";
 import { auth } from "../services/firebase"; // Import Firebase auth instance
 import { useNavigate } from "react-router-dom";
+import { getDocs } from "firebase/firestore";
 
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
+  const [role, setRole] = useState(null);
 
   // Track authentication state and handle navigation
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-       // Redirect to home if user logs out
-    
-        setUser(user); // Set user state when logged in
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        setRole(userDoc.exists() ? userDoc.data().role : "user");
+      } else {
+        setRole(null);
       }
+      setUser(user);
     });
 
     return () => unsubscribe();
@@ -33,7 +37,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, handleLogout }}>
+    <AuthContext.Provider value={{ user, handleLogout, role }}>
       {children}
     </AuthContext.Provider>
   );

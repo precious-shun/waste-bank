@@ -14,14 +14,18 @@ import { AuthProvider } from "./context/AuthContext";
 import TransactionHistory from "./pages/user/TransactionHistory";
 import UserProfile from "./pages/user/UserProfile";
 import WastePrices from "./pages/user/WastePrices";
+import PublicRoute from "./components/PublicRoute";
 // import NotificationList from "./pages/admin/notification/NotificationList";
 
 function App() {
   return (
     <AuthProvider>
       <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        <Route element={<PublicRoute />}>
+          <Route path="/" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+        </Route>
+
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
         {/* <Route
         path="/admin/dashboard"
