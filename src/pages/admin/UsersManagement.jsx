@@ -66,7 +66,6 @@ const tableHead = [
 const UsersManagement = () => {
   // Get Users
   const [users, setUsers] = useState([]);
-  const [balance, setBalance] = useState(0);
 
   const fetchData = async () => {
     await getDocs(collection(db, "users")).then((querySnapshot) => {
@@ -75,6 +74,7 @@ const UsersManagement = () => {
         id: doc.id,
       }));
       setUsers(data);
+      //console.log(data);
     });
   };
 
@@ -151,37 +151,6 @@ const UsersManagement = () => {
   useEffect(() => {
     fetchData();
   }, []);
-
-  //ingin mengambil balance yang didapat dari tiap transaksi user
-  useEffect(() => {
-    const fetchTotalBalance = async () => {
-      try {
-        let totalBalansce = 0;
-
-        for (const user of users) {
-          const querySnapshot = await getDocs(
-            query(
-              collection(db, "transactions"),
-              where("fullname", "==", user.fullname)
-            )
-          );
-
-          const userBalanace = querySnapshot.docs.reduce(
-            (sum, doc) => sum + doc.data().amount,
-            0
-          );
-
-          totalBalansce += userBalanace;
-        }
-
-        setBalance(totalBalansce);
-      } catch (error) {
-        console.error("Gagal mendapatkan balance", error);
-      }
-    };
-
-    fetchTotalBalance();
-  }, [users]);
 
   return (
     <>
@@ -263,7 +232,7 @@ const UsersManagement = () => {
                           <TableCell>{user.fullname}</TableCell>
                           <TableCell>{user.address}</TableCell>
                           <TableCell>{user.email}</TableCell>
-                          <TableCell>{Rupiah.format(balance)}</TableCell>
+                          <TableCell>{Rupiah.format(user.balance)}</TableCell>
                           <TableCell>{user.gender}</TableCell>
                           <TableCell>{user.role}</TableCell>
                           <TableCell
