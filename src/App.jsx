@@ -48,7 +48,7 @@ function App() {
           }
         />
         <Route
-          path="/user/"
+          path="/user"
           element={
             <ProtectedRoute requiredRole="client">
               <Homepage />
