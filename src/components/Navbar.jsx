@@ -42,6 +42,7 @@ const Navbar = () => {
               { label: "Home", path: "/user/" },
               { label: "Profile", path: "/user/profile" },
               { label: "Detailed History", path: "/user/history" },
+              { label: "Waste Exchange Rate", path: "/user/calc" },
             ].map(({ label, path }) => (
               <Button
                 key={label}

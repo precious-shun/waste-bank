@@ -13,6 +13,7 @@ import UnauthorizedPage from "./pages/UnauthorizedPage";
 import { AuthProvider } from "./context/AuthContext";
 import TransactionHistory from "./pages/user/TransactionHistory";
 import UserProfile from "./pages/user/UserProfile";
+import WastePrices from "./pages/user/WastePrices";
 // import NotificationList from "./pages/admin/notification/NotificationList";
 
 function App() {
@@ -30,6 +31,14 @@ function App() {
           </ProtectedRoute>
           }
           /> */}
+        <Route
+          path="/user/calc"
+          element={
+            <ProtectedRoute requiredRole="client">
+              <WastePrices />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/user/profile"
           element={
