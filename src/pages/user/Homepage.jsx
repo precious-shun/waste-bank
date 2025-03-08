@@ -32,8 +32,11 @@ const colors = {
 
 const Homepage = () => {
   const [transactions, setTrans] = useState([]);
+  const [latestTransaction, setLatestTransaction] = useState(null);
   const { user } = useAuth();
   const [fullname, setFullname] = useState("Guest"); // New state for fullname
+
+  console.log("Current User UID:", user?.uid);
 
   useEffect(() => {
     if (!user?.uid) return;
@@ -90,7 +93,15 @@ const Homepage = () => {
         }
 
         // Update state once with all transactions
-        setTrans(transactionsList);
+        setTrans(transactionsList); // Keep all transactions
+
+        // Find latest transaction
+        if (transactionsList.length > 0) {
+          const sortedTransactions = transactionsList.sort(
+            (a, b) => b.date - a.date
+          );
+          setLatestTransaction(sortedTransactions[0]); // Store latest transaction
+        }
       } catch (error) {
         console.error("Error fetching transactions:", error);
       }
@@ -157,47 +168,49 @@ const Homepage = () => {
         {/* Transaction History */}
         <Paper sx={{ p: 2, mt: 3, backgroundColor: colors.white }}>
           <Typography variant="h6" sx={{ color: colors.green, mb: 1 }}>
-            Riwayat Transaksi
+            Transaksi Terbaru
           </Typography>
 
-          <List>
-            {transactions.map((transaction, index) => (
-              <ListItem key={index} divider sx={{ display: "block" }}>
-                <Typography
-                  variant="body2"
-                  sx={{ color: colors.green, fontWeight: "bold" }}
-                >
-                  {transaction.date.toLocaleDateString("id-ID", {
-                    weekday: "long",
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })}
-                </Typography>
+          {latestTransaction ? (
+            <ListItem divider sx={{ display: "block" }}>
+              <Typography
+                variant="body2"
+                sx={{ color: colors.green, fontWeight: "bold" }}
+              >
+                {latestTransaction.date.toLocaleDateString("id-ID", {
+                  weekday: "long",
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}
+              </Typography>
 
-                <Typography
-                  variant="subtitle1"
-                  sx={{ fontWeight: "bold", color: colors.darkGreen }}
-                >
-                  Rp {transaction.total.toLocaleString("id-ID")}
-                </Typography>
+              <Typography
+                variant="subtitle1"
+                sx={{ fontWeight: "bold", color: colors.darkGreen }}
+              >
+                Rp {latestTransaction.total.toLocaleString("id-ID")}
+              </Typography>
 
-                <List sx={{ pl: 2, mt: 1 }}>
-                  {transaction.waste_products.map((product, idx) => (
-                    <ListItem
-                      key={idx}
-                      sx={{ display: "flex", justifyContent: "space-between" }}
-                    >
-                      <ListItemText
-                        primary={`${product.waste} (x${product.quantity})`}
-                        secondary={`Subtotal: Rp ${product.subtotal.toLocaleString("id-ID")}`}
-                      />
-                    </ListItem>
-                  ))}
-                </List>
-              </ListItem>
-            ))}
-          </List>
+              <List sx={{ pl: 2, mt: 1 }}>
+                {latestTransaction.waste_products.map((product, idx) => (
+                  <ListItem
+                    key={idx}
+                    sx={{ display: "flex", justifyContent: "space-between" }}
+                  >
+                    <ListItemText
+                      primary={`${product.waste} (x${product.quantity})`}
+                      secondary={`Subtotal: Rp ${product.subtotal.toLocaleString("id-ID")}`}
+                    />
+                  </ListItem>
+                ))}
+              </List>
+            </ListItem>
+          ) : (
+            <Typography variant="body2" sx={{ color: colors.orange }}>
+              Tidak ada transaksi terbaru.
+            </Typography>
+          )}
         </Paper>
       </Box>
     </Box>

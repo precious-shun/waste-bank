@@ -7,9 +7,17 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import { useEffect, useState } from "react";
 import { db } from "../../firebase";
-import { collection, query, where, getDocs, getDoc } from "firebase/firestore";
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  doc,
+  getDoc,
+} from "firebase/firestore";
 import { Box, Button, ListItem, ListItemText } from "@mui/material";
 import Navbar from "../../components/Navbar";
+import { useAuth } from "../../context/AuthContext";
 
 const colors = {
   darkGreen: "#2C514B",
@@ -20,80 +28,77 @@ const colors = {
   white: "#ffffff",
 };
 
-const style = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: 400,
-  bgcolor: "#ebebeb",
-  boxShadow: 24,
-  p: 4,
-  borderRadius: "20px",
-};
-
-const transactions1 = [
-  {
-    user_id: "users/aOSiV98JHmOdxEifE8dYQoWH05l2",
-    date: "2025-03-05T04:50:50.225Z",
-    total: 40100,
-    waste_products: [
-      {
-        waste_product_id: "1vt8ZR1FoVNm7tz7d2Zq",
-        quantity: 3,
-        subtotal: 22500,
-      },
-      {
-        waste_product_id: "5daXP6htmdONySFdKh7e",
-        quantity: 5,
-        subtotal: 14000,
-      },
-    ],
-  },
-  {
-    user_id: "users/aOSiV98JHmOdxEifE8dYQoWH05l2",
-    date: "2025-03-05T04:50:50.225Z",
-    total: 40100,
-    waste_products: [
-      {
-        waste_product_id: "1vt8ZR1FoVNm7tz7d2Zq",
-        quantity: 3,
-        subtotal: 22500,
-      },
-      {
-        waste_product_id: "5daXP6htmdONySFdKh7e",
-        quantity: 5,
-        subtotal: 14000,
-      },
-    ],
-  },
+const tableHead = [
+  { text: "Date", bgColor: colors.lightGreen },
+  { text: "Total Balance", bgColor: colors.lightGreen },
+  { text: "Total Waste", bgColor: colors.lightGreen },
+  { text: "Details", bgColor: colors.lightGreen },
 ];
 
 function TransactionHistory() {
+  const { user } = useAuth();
   const [transactions, setTransactions] = useState([]);
   const [selectedTransaction, setSelectedTransaction] = useState(null);
 
   useEffect(() => {
-    // const fetchTransactions = async () => {
-    //   try {
-    //     const transactionsRef = collection(db, "transaction");
-    //     const q = query(
-    //       transactionsRef,
-    //       where("user_id", "==", `users/${currentUser.uid}`)
-    //     );
-    //     const querySnapshot = await getDocs(q);
-    //     const transactionData = querySnapshot.docs.map((doc) => ({
-    //       id: doc.id,
-    //       ...doc.data(),
-    //     }));
-    //     console.log(transactionData);
-    //     setTransactions(transactionData);
-    //   } catch (error) {
-    //     console.error("Gagal mengambil data transaksi:", error);
-    //   }
-    // };
-    // fetchTransactions();
-  }, []);
+    if (!user?.uid) return;
+
+    const fetchTransaction = async () => {
+      try {
+        const querySnapshot = await getDocs(
+          query(
+            collection(db, "transactions"),
+            where("user_id", "==", doc(db, "users", user.uid))
+          )
+        );
+        let transactionsList = [];
+
+        for (const docSnapshot of querySnapshot.docs) {
+          const data = docSnapshot.data();
+          const wasteProducts = data.waste_products || [];
+
+          let wasteProductDetails = await Promise.all(
+            wasteProducts.map(async (wp) => {
+              let wasteName = "Unknown";
+
+              if (wp.waste_product_id) {
+                try {
+                  const wasteSnap = await getDoc(wp.waste_product_id);
+                  if (wasteSnap.exists()) {
+                    wasteName = wasteSnap.data().waste;
+                  }
+                } catch (err) {
+                  console.error("Error fetching waste data:", err);
+                }
+              }
+
+              return {
+                quantity: wp.quantity,
+                subtotal: wp.subtotal,
+                waste: wasteName,
+              };
+            })
+          );
+
+          transactionsList.push({
+            id: docSnapshot.id,
+            date: data.date.toDate(),
+            total: data.total,
+            waste_products: wasteProductDetails,
+          });
+        }
+
+        // Sort transactions from latest to earliest
+        transactionsList.sort((a, b) => b.date - a.date);
+
+        setTransactions(transactionsList);
+      } catch (error) {
+        console.error("Error fetching transactions:", error);
+      }
+    };
+
+    fetchTransaction();
+  }, [user]);
 
   return (
     <Box sx={{ backgroundColor: colors.lightGrey, minHeight: "100vh" }}>
@@ -104,37 +109,48 @@ function TransactionHistory() {
         </h2>
 
         <TableContainer
-          sx={{ p: 3, mt: 3, backgroundColor: "#c2d1c8", borderRadius: `20px` }}
+          elevation="0"
+          sx={{
+            backgroundColor: colors.lightGreen,
+            height: "75%",
+            borderRadius: "20px",
+          }}
+          component={Paper}
         >
-          <Table>
+          <Table stickyHeader sx={{ minWidth: 650 }} aria-label="simple table">
             <TableHead>
               <TableRow className="font-semibold">
-                <TableCell>Date</TableCell>
-                <TableCell>Total Balance</TableCell>
-                <TableCell>Total Waste</TableCell>
-                <TableCell>Details</TableCell>
+                {tableHead.map((item, index) => (
+                  <TableCell key={index} sx={{ backgroundColor: item.bgColor }}>
+                    <b>{item.text}</b>
+                  </TableCell>
+                ))}
               </TableRow>
             </TableHead>
             <TableBody>
-              {transactions1.map((transaction, index) => (
-                <TableRow
-                  key={index}
-                  sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                >
-                  <TableCell component="th" scope="row">
-                    {new Date(transaction.date).toLocaleDateString("id-ID")}
+              {transactions.map((transaction, index) => (
+                <TableRow key={index}>
+                  <TableCell>
+                    {transaction.date.toLocaleDateString("id-ID", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "numeric",
+                    })}
                   </TableCell>
-                  <TableCell align="center">
-                    Rp {transaction.total.toLocaleString("id-ID")}
+                  <TableCell>
+                    Rp{" "}
+                    {transaction.waste_products
+                      .reduce((sum, item) => sum + item.subtotal, 0)
+                      .toLocaleString("id-ID")}
                   </TableCell>
-                  <TableCell align="center">
+                  <TableCell>
                     {transaction.waste_products.reduce(
                       (sum, item) => sum + item.quantity,
                       0
                     )}{" "}
                     Kg
                   </TableCell>
-                  <TableCell align="center">
+                  <TableCell>
                     <Button
                       onClick={() => setSelectedTransaction(transaction)}
                       sx={{
@@ -157,7 +173,9 @@ function TransactionHistory() {
         {selectedTransaction && (
           <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
             <div className="bg-white p-6 rounded-2xl w-96">
-              <h3 className="text-lg font-semibold mb-4">Detail Transaksi</h3>
+              <h3 className="text-lg font-semibold mb-4">
+                Transaction Details
+              </h3>
               <ul className="mb-4">
                 {selectedTransaction.waste_products.map((product, idx) => (
                   <ListItem
@@ -166,9 +184,7 @@ function TransactionHistory() {
                   >
                     <ListItemText
                       primary={`${product.waste} (x${product.quantity})`}
-                      secondary={`Subtotal: Rp ${product.subtotal.toLocaleString(
-                        "id-ID"
-                      )}`}
+                      secondary={`Subtotal: Rp ${product.subtotal.toLocaleString("id-ID")}`}
                     />
                   </ListItem>
                 ))}
@@ -177,7 +193,7 @@ function TransactionHistory() {
                 onClick={() => setSelectedTransaction(null)}
                 className="bg-green-900 rounded-xl text-white px-4 py-2 mt-4"
               >
-                Tutup
+                Close
               </button>
             </div>
           </div>

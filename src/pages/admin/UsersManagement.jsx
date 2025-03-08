@@ -186,7 +186,11 @@ const UsersManagement = () => {
           </div>
           <TableContainer
             elevation="0"
-            sx={{ backgroundColor: theme.lightGreen, height: "75%" }}
+            sx={{
+              backgroundColor: theme.lightGreen,
+              height: "75%",
+              borderRadius: "20px",
+            }}
             component={Paper}
           >
             <Table
@@ -210,7 +214,10 @@ const UsersManagement = () => {
               </TableHead>
               <TableBody>
                 {filteredUsers.length === 0 ? (
-                  <p className="text-center text-green-900 text-lg left-1/2 ms-14 top-1/2 absolute">
+                  <p
+                    className="text-center text-green-900 text-lg left-1/2 ms-14 top-1/2 absolute"
+                    aria-label="simple table"
+                  >
                     User not found
                   </p>
                 ) : (
@@ -267,7 +274,11 @@ const UsersManagement = () => {
             </Table>
           </TableContainer>
           <TablePagination
-            sx={{ backgroundColor: "#ffffff", borderRadius: 1 }}
+            sx={{
+              backgroundColor: "#ffffff",
+              borderRadius: "20px",
+              marginTop: 1,
+            }}
             component="div"
             count={filteredUsers.length}
             page={page}
