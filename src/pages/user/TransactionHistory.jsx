@@ -104,7 +104,10 @@ function TransactionHistory() {
     <Box sx={{ backgroundColor: colors.lightGrey, minHeight: "100vh" }}>
       <Navbar />
       <div className="p-6">
-        <h2 className="text-2xl font-bold mb-4 text-green-900">
+        <h2
+          className="text-2xl font-bold mb-4"
+          style={{ color: colors.darkGreen }}
+        >
           Transaction History
         </h2>
 
