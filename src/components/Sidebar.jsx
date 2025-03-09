@@ -13,6 +13,7 @@ import { Avatar } from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   ArchiveBoxIcon,
+  BellAlertIcon,
   DocumentTextIcon,
   Squares2X2Icon,
   UserGroupIcon,
@@ -47,7 +48,7 @@ const sidebarItem = [
   },
   {
     name: "Notification",
-    icon: <DocumentTextIcon className="size-6 ms-2 text-white" />,
+    icon: <BellAlertIcon className="size-6 ms-2 text-white" />,
     path: "/notification",
   },
 ];
