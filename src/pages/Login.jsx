@@ -66,16 +66,16 @@ const Login = () => {
       style={{ backgroundColor: theme.darkGreen }}
       className="flex justify-center items-center h-screen"
     >
-      <div className="flex w-4/5 items-center justify-center space-x-10">
-        <div className="w-1/2 flex justify-center">
-          <img src={Logo} alt="Logo" className="w-144" />
+      <div className="flex flex-col lg:w-4/5 md:flex-row items-center justify-center lg:space-x-10">
+        <div className="sm:w-1/2 flex justify-center">
+          <img src={Logo} alt="Logo" className="w-64 md:w-auto" />
         </div>
-        <div className="w-1/3">
+        <div className="lg:w-1/3">
           <Card
             variant="outlined"
             style={{ backgroundColor: theme.lightGrey }}
             sx={{ borderRadius: 4 }}
-            className="w-96 px-1.5 py-2"
+            className="sm:w-96 px-1.5 py-2 mx-4"
           >
             <CardContent>
               <Typography
