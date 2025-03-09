@@ -9,7 +9,7 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Logo from "../assets/logo.svg";
-import { Avatar } from "@mui/material";
+import { Avatar, colors } from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   ArchiveBoxIcon,
@@ -17,7 +17,9 @@ import {
   DocumentTextIcon,
   Squares2X2Icon,
   UserGroupIcon,
+  Bars3Icon
 } from "@heroicons/react/24/solid";
+import { use, useEffect, useState } from "react";
 
 const sidebarColor = {
   darkGreen: "#2C514B",
@@ -53,14 +55,26 @@ const sidebarItem = [
   },
 ];
 
+
 const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   return (
     <>
+      <button onClick={() => {
+        setIsMenuOpen((prev) => !prev)
+        document.body.style.overflow = 'hidden'
+      }
+      } className="sm:hidden absolute right-10 top-6"><Bars3Icon style={{color: colors.darkGreen}} className="size-6"/></button>
+      <div className={`${isMenuOpen ? "absolute" : "hidden"} sm:flex`}>
       <Box sx={{ display: "flex" }}>
         <CssBaseline />
+        <button onClick={() => {
+          setIsMenuOpen((prev) => !prev)
+          document.body.style.overflow = 'unset'
+          }} className="sm:hidden z-40 tetx-black bg-gray-900/70 w-screen h-screen"></button>
         <Drawer
           sx={{
             width: 240,
@@ -85,7 +99,10 @@ const Sidebar = () => {
                 <ListItem key={index} disablePadding>
                   <ListItemButton
                     selected={location.pathname === item.path}
-                    onClick={() => navigate(item.path)}
+                    onClick={() => {
+                      navigate(item.path)
+                      document.body.style.overflow = 'unset'
+                    }}
                     sx={{
                       "&.Mui-selected": {
                         backgroundColor: "#335F58",
@@ -123,6 +140,7 @@ const Sidebar = () => {
           </List>
         </Drawer>
       </Box>
+      </div>
     </>
   );
 };
