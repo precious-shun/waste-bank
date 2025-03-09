@@ -3,6 +3,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "../services/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { Navigate } from "react-router-dom";
+import Loading from "./Loading";
 
 const ProtectedRoute = ({ children, requiredRole }) => {
   const [user, setUser] = useState(null);
@@ -26,7 +27,7 @@ const ProtectedRoute = ({ children, requiredRole }) => {
     return () => unsubscribe();
   }, []);
 
-  if (isLoading) return <p>Loading...</p>;
+  if (isLoading) return <Loading />;
 
   if (!user) {
     return <Navigate to="/" />;
