@@ -214,12 +214,13 @@ const UsersManagement = () => {
               </TableHead>
               <TableBody>
                 {filteredUsers.length === 0 ? (
-                  <p
-                    className="text-center text-green-900 text-lg left-1/2 ms-14 top-1/2 absolute"
-                    aria-label="simple table"
-                  >
-                    User not found
-                  </p>
+                  <TableRow >
+                    <TableCell sx={{border: 0}}>
+                      <p className="text-center text-green-900 text-lg left-1/2 ms-14 top-1/2 absolute" aria-label="simple table">
+                        User not found
+                       </p>
+                    </TableCell>
+                  </TableRow>
                 ) : (
                   filteredUsers
                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
