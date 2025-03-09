@@ -1,29 +1,26 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth, db } from "../services/firebase";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useAuth } from "../context/AuthContext";
 import { doc, setDoc } from "firebase/firestore";
+import { db } from "../services/firebase";
 import {
   TextField,
   Button,
   Card,
   CardContent,
   MenuItem,
+  FormControl,
+  InputLabel,
+  Select,
+  FormHelperText,
   Typography,
   Divider,
 } from "@mui/material";
 import { theme } from "../theme";
 import { useNavigate } from "react-router-dom";
 import Logo from "../assets/logo.svg";
-
-const registerSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().nonempty("Password is required"),
-  fullname: z.string().nonempty("Fullname is required"),
-  gender: z.enum(["Male", "Female"], { message: "Gender is required" }),
-  address: z.string().nonempty("Address is required"),
-});
 
 const inputStyle = {
   ":hover .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline": {
@@ -40,38 +37,52 @@ const inputStyle = {
   },
 };
 
+const registerSchema = z.object({
+  email: z.string().email("Invalid email format"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  fullname: z.string().min(3, "Full name must be at least 3 characters"),
+  gender: z.enum(["male", "female"], {
+    errorMap: () => ({ message: "Please select a gender" }),
+  }),
+  address: z.string().min(10, "Address must be at least 10 characters"),
+});
+
 const Register = () => {
+  const { signup } = useAuth();
+  const navigate = useNavigate();
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(registerSchema),
+    defaultValues: {
+      gender: "",
+    },
   });
-
-  const navigate = useNavigate();
 
   const handleRegister = async (data) => {
     try {
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        data.email,
-        data.password
-      );
-      const user = userCredential.user;
+      setError("");
+      setIsLoading(true);
 
-      await setDoc(doc(db, "users", user.uid), {
-        email: user.email,
+      const userCredential = await signup(data.email, data.password);
+      await setDoc(doc(db, "users", userCredential.uid), {
+        email: data.email,
         fullname: data.fullname,
         gender: data.gender,
         address: data.address,
         balance: 0,
         role: "client",
       });
-
       alert("User created successfully");
     } catch (error) {
-      console.error("Error creating user:", error.message);
+      setError("Failed to create an account: " + error.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -92,18 +103,18 @@ const Register = () => {
             className="w-96 px-1.5"
           >
             <CardContent>
-              <p
-                style={{ color: theme.darkGreen }}
+              <Typography
                 className="text-center text-2xl font-semibold mb-6"
+                style={{ color: theme.darkGreen }}
               >
                 Register
-                <Typography
-                  className="text-center mb-6"
-                  style={{ color: theme.darkGreen }}
-                >
-                  Please fill in your data
-                </Typography>
-              </p>
+              </Typography>
+              <Typography
+                className="text-center mb-6"
+                style={{ color: theme.darkGreen }}
+              >
+                Please fill in your data
+              </Typography>
               <form
                 onSubmit={handleSubmit(handleRegister)}
                 className="space-y-6"
@@ -137,19 +148,21 @@ const Register = () => {
                     error={!!errors.fullname}
                     helperText={errors.fullname?.message}
                   />
-                  <TextField
-                    sx={inputStyle}
+                  <FormControl
                     fullWidth
-                    select
-                    label="Gender"
-                    variant="outlined"
-                    {...register("gender")}
                     error={!!errors.gender}
-                    helperText={errors.gender?.message}
+                    variant="outlined"
+                    sx={inputStyle}
                   >
-                    <MenuItem value="Male">Male</MenuItem>
-                    <MenuItem value="Female">Female</MenuItem>
-                  </TextField>
+                    <InputLabel id="gender-label">Gender</InputLabel>
+                    <Select labelId="gender-label" {...register("gender")}>
+                      <MenuItem value="male">Male</MenuItem>
+                      <MenuItem value="female">Female</MenuItem>
+                    </Select>
+                    {errors.gender && (
+                      <FormHelperText>{errors.gender.message}</FormHelperText>
+                    )}
+                  </FormControl>
                 </div>
                 <TextField
                   sx={inputStyle}
@@ -166,20 +179,18 @@ const Register = () => {
                   type="submit"
                   variant="contained"
                   fullWidth
+                  disabled={isLoading}
                 >
                   Register
                 </Button>
               </form>
-
               <Divider sx={{ my: 3 }} />
-
               <Typography
                 className="text-center"
                 style={{ color: theme.darkGreen }}
               >
                 Already have an account?
               </Typography>
-
               <Button
                 size="large"
                 sx={{ backgroundColor: theme.orange, mt: 2 }}

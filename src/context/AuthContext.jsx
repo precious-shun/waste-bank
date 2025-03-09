@@ -1,49 +1,82 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import { signOut, onAuthStateChanged } from "firebase/auth";
-import { auth, db } from "../services/firebase"; // Import Firebase auth instance
-import { useNavigate } from "react-router-dom";
-import { getDoc, doc } from "firebase/firestore";
+import { createContext, useContext, useState, useEffect } from "react";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+} from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "../services/firebase";
 
 const AuthContext = createContext();
 
-export function AuthProvider({ children }) {
+export const useAuth = () => {
+  return useContext(AuthContext);
+};
+
+export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const navigate = useNavigate();
   const [role, setRole] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Track authentication state and handle navigation
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        setRole(userDoc.exists() ? userDoc.data().role : "user");
-      } else {
-        setRole(null);
-      }
-      setUser(user);
-    });
-
-    return () => unsubscribe();
-  }, [navigate]);
-
-  // Logout function
-  const handleLogout = async () => {
+  const signup = async (email, password) => {
     try {
-      await signOut(auth);
-      console.log("User logged out");
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      return userCredential.user;
     } catch (error) {
-      console.error("Error logging out:", error);
+      throw error;
     }
   };
 
-  return (
-    <AuthContext.Provider value={{ user, handleLogout, role }}>
-      {children}
-    </AuthContext.Provider>
-  );
-}
+  const login = async (email, password) => {
+    return signInWithEmailAndPassword(auth, email, password);
+  };
 
-// Custom hook to use the AuthContext
-export function useAuth() {
-  return useContext(AuthContext);
-}
+  const logout = () => {
+    return signOut(auth);
+  };
+
+  const fetchUserData = async (uid) => {
+    try {
+      const userDoc = await getDoc(doc(db, "users", uid));
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        setRole(userData.role);
+        return userData;
+      }
+      return null;
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      return null;
+    }
+  };
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      setUser(user);
+      if (user) {
+        await fetchUserData(user.uid);
+      } else {
+        setRole(null);
+      }
+      setIsLoading(false);
+    });
+
+    return unsubscribe;
+  }, []);
+
+  const value = {
+    user,
+    role,
+    isLoading,
+    signup,
+    login,
+    logout,
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};
