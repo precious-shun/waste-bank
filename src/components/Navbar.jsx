@@ -17,7 +17,7 @@ const colors = {
 };
 
 const navList = [
-  { label: "Home", path: "/user/" },
+  { label: "Home", path: "/user" },
   { label: "Profile", path: "/user/profile" },
   { label: "Detailed History", path: "/user/history" },
   { label: "Waste Exchange Rate", path: "/user/calc" },
@@ -120,6 +120,7 @@ const Navbar = () => {
       </>
       ))
       }
+      <button onClick={handleLogout} style={{backgroundColor: theme.orange}} className="p-1 w-36 mx-auto rounded-full mt-4 text-white font-semibold">LOGOUT</button>
     </div>
     </>
   );
