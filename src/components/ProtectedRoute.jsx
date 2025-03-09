@@ -1,41 +1,20 @@
-import { useEffect, useState } from "react";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth, db } from "../services/firebase";
-import { doc, getDoc } from "firebase/firestore";
-import { Navigate } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import Loading from "./Loading";
 
-const ProtectedRoute = ({ children, requiredRole }) => {
-  const [user, setUser] = useState(null);
-  const [role, setRole] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
+const ProtectedRoute = ({ requiredRole }) => {
+  const { user, role, isLoading } = useAuth();
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        setUser(user);
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        if (userDoc.exists()) {
-          setRole(userDoc.data().role);
-        }
-      } else {
-        setUser(null);
-      }
-      setIsLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  if (isLoading) return <Loading />;
-
-  if (!user) {
-    return <Navigate to="/" />;
-  } else if (role !== requiredRole) {
-    return <Navigate to="/unauthorized" />;
+  if (isLoading) {
+    return <Loading />;
   }
 
-  return children;
+  if (!user) return <Navigate to="/" replace />;
+
+  if (requiredRole && role !== requiredRole)
+    return <Navigate to="/unauthorized" replace />;
+
+  return <Outlet />;
 };
 
 export default ProtectedRoute;

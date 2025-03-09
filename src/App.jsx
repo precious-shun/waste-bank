@@ -15,6 +15,7 @@ import TransactionHistory from "./pages/user/TransactionHistory";
 import UserProfile from "./pages/user/UserProfile";
 import WastePrices from "./pages/user/WastePrices";
 import PublicRoute from "./components/PublicRoute";
+import NotFoundPage from "./pages/NotFoundPage";
 // import NotificationList from "./pages/admin/notification/NotificationList";
 
 function App() {
@@ -27,62 +28,22 @@ function App() {
         </Route>
 
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
-        {/* <Route
-        path="/admin/dashboard"
-        element={
-          <ProtectedRoute requiredRole="admin">
-          <AdminDashboard />
-          </ProtectedRoute>
-          }
-          /> */}
-        <Route
-          path="/user/calc"
-          element={
-            <ProtectedRoute requiredRole="client">
-              <WastePrices />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/user/profile"
-          element={
-            <ProtectedRoute requiredRole="client">
-              <UserProfile />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/user"
-          element={
-            <ProtectedRoute requiredRole="client">
-              <Homepage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/user/history"
-          element={
-            <ProtectedRoute requiredRole="client">
-              <TransactionHistory />
-            </ProtectedRoute>
-          }
-        />
-        {/* <Route
-          path="/admin/notifications"
-          element={
-            <ProtectedRoute requiredRole="admin">
-              <NotificationList />
-              </ProtectedRoute>
-              }
-              /> */}
-        {/* <Route
-          path="/create-transaction"
-          element={
-            <ProtectedRoute requiredRole="client">
-            <CreateTransaction />
-            </ProtectedRoute>
-            }
-            /> */}
+        <Route path="/*" element={<NotFoundPage />} />
+
+        {/* client */}
+        <Route element={<ProtectedRoute requiredRole="client" />}>
+          <Route path="/user/calc" element={<WastePrices />} />
+          <Route path="/user/profile" element={<UserProfile />} />
+          <Route path="/user" element={<Homepage />} />
+          <Route path="/user/history" element={<TransactionHistory />} />
+        </Route>
+
+        {/* admin */}
+        <Route element={<ProtectedRoute requiredRole="admin" />}>
+          {/* <Route path="/admin/dashboard" element={<AdminDashboard />} /> */}
+          {/* <Route path="/admin/notifications" element={<NotificationList />} /> */}
+          {/* <Route path="/create-transaction" element={<CreateTransaction />} /> */}
+        </Route>
       </Routes>
     </AuthProvider>
   );

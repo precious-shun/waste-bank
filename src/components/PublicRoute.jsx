@@ -1,21 +1,21 @@
-import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { useEffect } from "react";
+import Loading from "./Loading";
 
-function PublicRoute() {
-  const { user, role } = useAuth();
+const PublicRoute = () => {
+  const { user, role, isLoading } = useAuth();
 
-  //   useEffect(() => {
-  //     console.log("User state changed:", user); // Debugging: Pastikan state berubah
-  //   }, [user]);
-
-  if (user) {
-    return <Navigate to={role === "admin" ? "/admin/dashboard" : "/user"} />;
+  if (isLoading) {
+    return <Loading />;
   }
 
-  console.log(role);
+  if (user && role) {
+    return (
+      <Navigate to={role === "admin" ? "/admin/dashboard" : "/user"} replace />
+    );
+  }
 
   return <Outlet />;
-}
+};
 
 export default PublicRoute;
