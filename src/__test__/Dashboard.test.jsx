@@ -1,11 +1,10 @@
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import Dashboard from "../pages/admin/Dashboard";
 import { BrowserRouter } from "react-router-dom";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import { db } from "../firebase";
 import { collection, getDocs } from "firebase/firestore";
-import { vi } from "vitest";
 
 // Mock Firebase Firestore
 vi.mock("../firebase", () => ({
