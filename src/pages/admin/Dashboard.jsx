@@ -242,11 +242,13 @@ const Dashboard = () => {
                 <Select
                   value={selectedYear}
                   onChange={(e) => setSelectedYear(e.target.value)}
+                  data-testid="year-dropdown"
                   sx={{
                     mb: 2,
                     backgroundColor: "#ebebeb",
                     borderRadius: "10px",
                   }}
+                  MenuProps={{ disablePortal: true }}
                 >
                   {[2022, 2023, 2024, 2025, 2026, 2027].map((year) => (
                     <MenuItem key={year} value={year}>
