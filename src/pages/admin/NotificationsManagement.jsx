@@ -49,6 +49,7 @@ import {
   Timestamp,
   getDoc,
 } from "firebase/firestore";
+import { toast } from "sonner";
 
 const theme = {
   darkGreen: "#2C514B",
@@ -576,7 +577,7 @@ const NotificationsManagement = () => {
       }));
       setUsers(userData);
     } catch (error) {
-      console.error("Error fetching users: ", error);
+      toast.error("Error fetching users");
     }
   };
 
@@ -603,7 +604,7 @@ const NotificationsManagement = () => {
           }
           return recipient;
         } catch (error) {
-          console.error("Error fetching recipient details: ", error);
+          toast.error("Error fetching recipient details");
           return recipient;
         }
       }
@@ -640,7 +641,7 @@ const NotificationsManagement = () => {
       const processedNotifications = await Promise.all(notificationsPromises);
       setNotifications(processedNotifications);
     } catch (error) {
-      console.error("Error fetching notifications: ", error);
+      toast.error("Error fetching notifications");
     } finally {
       setIsLoading(false);
     }
@@ -742,10 +743,10 @@ const NotificationsManagement = () => {
       await fetchNotifications();
       handleCloseNotificationModal();
     } catch (error) {
-      console.error(
-        `Error ${notificationModalState.currentNotification ? "updating" : "adding"} notification:`,
-        error
+      toast.error(
+        `Error ${notificationModalState.currentNotification ? "updating" : "adding"} notification:`
       );
+
       alert(
         `Failed to ${
           notificationModalState.currentNotification ? "update" : "add"
@@ -764,9 +765,9 @@ const NotificationsManagement = () => {
 
       await fetchNotifications();
       handleCloseDeleteModal();
+      toast.success("Success deleting notification");
     } catch (error) {
-      console.error("Error deleting notification: ", error);
-      alert("Failed to delete notification. Please try again.");
+      toast.error("Failed to delete notification. Please try again");
     }
   };
 

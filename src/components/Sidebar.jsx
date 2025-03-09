@@ -45,6 +45,11 @@ const sidebarItem = [
     icon: <DocumentTextIcon className="size-6 ms-2 text-white" />,
     path: "/trans",
   },
+  {
+    name: "Notification",
+    icon: <DocumentTextIcon className="size-6 ms-2 text-white" />,
+    path: "/notification",
+  },
 ];
 
 const Sidebar = () => {

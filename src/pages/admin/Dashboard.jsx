@@ -23,6 +23,7 @@ import { useEffect, useState } from "react";
 //firebase
 import { db } from "../../firebase";
 import { collection, query, orderBy, limit, getDocs } from "firebase/firestore";
+import { toast } from "sonner";
 
 const Dashboard = () => {
   const [totalUsers, setTotalUsers] = useState(0);
@@ -126,11 +127,9 @@ const Dashboard = () => {
           return year === selectedYear;
         });
 
-        console.log(monthlyData);
-        console.log(formattedData);
         setChartData(filteredData);
       } catch (error) {
-        console.error("Error fetching transactions:", error);
+        toast.error("Error fetching transactions");
       }
     };
 

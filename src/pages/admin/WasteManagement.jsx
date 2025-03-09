@@ -24,6 +24,7 @@ import {
   deleteDoc,
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 const theme = {
   darkGreen: "#2C514B",
@@ -50,19 +51,16 @@ const WasteManagement = () => {
   const [waste, setWaste] = useState("");
   const [unit, setUnit] = useState("");
   const [price, setPrice] = useState("");
-  // const [quantity, setQuantity] = useState("");
   const [editingWaste, setEditingWaste] = useState(null);
-  //pencarian
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleAddWaste = async () => {
-    if (!waste || !unit || !price) return; // Prevent adding empty data
+    if (!waste || !unit || !price) return;
 
     const newWaste = {
       waste,
       unit,
       price: parseInt(price),
-      // quantity: parseInt(quantity),
     };
 
     try {
@@ -73,11 +71,11 @@ const WasteManagement = () => {
       setWaste("");
       setUnit("");
       setPrice("");
-      // setQuantity("");
 
       handleClose();
+      toast.success("Success adding waste");
     } catch (error) {
-      console.error("Error adding document: ", error);
+      toast.error("Error adding waste");
     }
   };
 
@@ -86,7 +84,6 @@ const WasteManagement = () => {
     setWaste(wasteItem.waste);
     setUnit(wasteItem.unit);
     setPrice(wasteItem.price);
-    // setQuantity(wasteItem.quantity);
     handleOpen();
   };
 
@@ -99,7 +96,6 @@ const WasteManagement = () => {
         waste,
         unit,
         price: parseInt(price),
-        // quantity: parseInt(quantity),
       });
 
       setWastes((prevWastes) =>
@@ -110,7 +106,6 @@ const WasteManagement = () => {
                 waste,
                 unit,
                 price: parseInt(price),
-                // quantity: parseInt(quantity),
               }
             : item
         )
@@ -120,15 +115,15 @@ const WasteManagement = () => {
       setWaste("");
       setUnit("");
       setPrice("");
-      // setQuantity("");
       handleClose();
+      toast.success("Success updating waste");
     } catch (error) {
-      console.error("Error updating document: ", error);
+      toast.error("Error updating waste");
     }
   };
 
   const [wastes, setWastes] = useState([]);
-  //filtered search
+
   const filteredWastes = wastes.filter((waste) =>
     waste.waste.toLowerCase().includes(searchQuery)
   );
@@ -167,8 +162,9 @@ const WasteManagement = () => {
 
       setDeleteTarget(null);
       confirmClose();
+      toast.success("Success deleting waste");
     } catch (error) {
-      console.error("Error deleting document: ", error);
+      toast.error("Error deleting waste");
     }
   };
 
@@ -381,7 +377,7 @@ const WasteManagement = () => {
             <TextField
               fullWidth
               size="small"
-              name="email"
+              name="price"
               variant="filled"
               label="Price"
               type="number"

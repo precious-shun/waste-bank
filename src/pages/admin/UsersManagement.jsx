@@ -31,6 +31,7 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
+import { toast } from "sonner";
 
 const theme = {
   darkGreen: "#2C514B",
@@ -64,7 +65,6 @@ const tableHead = [
 ];
 
 const UsersManagement = () => {
-  // Get Users
   const [users, setUsers] = useState([]);
 
   const fetchData = async () => {
@@ -74,11 +74,9 @@ const UsersManagement = () => {
         id: doc.id,
       }));
       setUsers(data);
-      //console.log(data);
     });
   };
 
-  // Edit User
   const [editUserData, setEditUserData] = useState({});
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
@@ -98,12 +96,12 @@ const UsersManagement = () => {
       await updateDoc(doc(db, "users", editUserData.id), editUserData);
       handleClose();
       fetchData();
+      toast.success("Success update user");
     } catch (error) {
-      console.log(error);
+      toast.error("Failed update user");
     }
   };
 
-  // Delete User
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [confirmModal, setConfirmModal] = useState(false);
   const confirmOpen = () => setConfirmModal(true);
@@ -115,12 +113,12 @@ const UsersManagement = () => {
       setDeleteTarget(null);
       confirmClose();
       fetchData();
+      toast.success("Success deleting user");
     } catch (error) {
-      console.log(error);
+      toast.error("Error deleting user");
     }
   };
 
-  // Filter
   const [search, setSearch] = useState("");
 
   const filteredUsers = users.filter((user) => {
@@ -129,7 +127,6 @@ const UsersManagement = () => {
       : user.fullname && user.fullname.toLowerCase().includes(search);
   });
 
-  // Table Pagination
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 

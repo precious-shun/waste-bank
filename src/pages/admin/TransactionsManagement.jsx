@@ -48,6 +48,7 @@ import { useEffect, useState } from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 
 const theme = {
   darkGreen: "#2C514B",
@@ -541,35 +542,42 @@ const TransactionFormModal = ({
   );
 
   useEffect(() => {
-    if (isOpen) {
-      if (initialData) {
-        // Set data jika sedang edit transaksi
-        reset({
-          transactionDate: initialData.date
-            ? initialData.date.toISOString().split("T")[0]
-            : new Date().toISOString().split("T")[0],
-          selectedUser:
-            users.find((u) => u.id === initialData.user?.id) || null,
-          transactionItems: initialData.waste_products?.map((item) => ({
-            waste_product_id:
-              wasteProducts.find((wp) => wp.id === item.waste_product_id?.id) ||
-              null,
+    if (initialData) {
+      const user = users.find((u) => u.id === initialData.user?.id);
+      const transactionDateObj = initialData.date || new Date();
+      const formattedDate = transactionDateObj.toISOString().split("T")[0];
+
+      let items = [{ waste_product_id: null, quantity: 1, subtotal: 0 }];
+
+      if (initialData.waste_products && initialData.waste_products.length > 0) {
+        items = initialData.waste_products.map((item) => {
+          const wasteProductId = item.waste_product_id?.id;
+          const wasteProduct = wasteProducts.find(
+            (wp) => wp.id === wasteProductId
+          );
+          return {
+            waste_product_id: wasteProduct || null,
             quantity: item.quantity || 1,
             subtotal: item.subtotal || 0,
-          })) || [{ waste_product_id: null, quantity: 1, subtotal: 0 }],
-        });
-      } else {
-        // Reset form jika transaksi baru
-        reset({
-          transactionDate: new Date().toISOString().split("T")[0],
-          selectedUser: null,
-          transactionItems: [
-            { waste_product_id: null, quantity: 1, subtotal: 0 },
-          ],
+          };
         });
       }
+
+      reset({
+        transactionDate: formattedDate,
+        selectedUser: user || null,
+        transactionItems: items,
+      });
+    } else {
+      reset({
+        transactionDate: new Date().toISOString().split("T")[0],
+        selectedUser: null,
+        transactionItems: [
+          { waste_product_id: null, quantity: 1, subtotal: 0 },
+        ],
+      });
     }
-  }, [isOpen, initialData, reset, users, wasteProducts]);
+  }, [initialData, reset, users, wasteProducts]);
 
   const addWasteProductItem = () => {
     append({ waste_product_id: null, quantity: 1, subtotal: 0 });
@@ -756,7 +764,7 @@ const TransactionsManagement = () => {
 
       setTransactions(transactionsData);
     } catch (error) {
-      console.error("Error fetching transactions:", error);
+      toast.error("Error fetching transactions");
     } finally {
       setIsLoading(false);
     }
@@ -774,7 +782,7 @@ const TransactionsManagement = () => {
 
       setWasteProducts(wasteProductsData);
     } catch (error) {
-      console.error("Error fetching waste products:", error);
+      toast.error("Error fetching waste products");
     }
   };
 
@@ -788,7 +796,7 @@ const TransactionsManagement = () => {
 
       setUsers(usersData);
     } catch (error) {
-      console.error("Error fetching users:", error);
+      toast.error("Error fetching users");
     }
   };
 
@@ -872,93 +880,94 @@ const TransactionsManagement = () => {
 
       handleCloseFormModal();
       fetchTransactions();
+      toast.success("Success saving transaction");
     } catch (error) {
-      console.error("Error saving transaction:", error);
+      toast.error("Error saving transaction");
     }
-  };
 
-  const handleConfirmDelete = async () => {
-    if (!deleteModalState.transactionToDelete) return;
+    const handleConfirmDelete = async () => {
+      if (!deleteModalState.transactionToDelete) return;
 
-    try {
-      await deleteDoc(
-        doc(db, "transactions", deleteModalState.transactionToDelete.id)
-      );
+      try {
+        await deleteDoc(
+          doc(db, "transactions", deleteModalState.transactionToDelete.id)
+        );
 
-      setTransactions((prevTransactions) =>
-        prevTransactions.filter(
-          (item) => item.id !== deleteModalState.transactionToDelete.id
-        )
-      );
+        setTransactions((prevTransactions) =>
+          prevTransactions.filter(
+            (item) => item.id !== deleteModalState.transactionToDelete.id
+          )
+        );
 
-      handleCloseDeleteModal();
-    } catch (error) {
-      console.error("Error deleting transaction:", error);
-    }
-  };
+        handleCloseDeleteModal();
+        toast.success("Suscces deleting transaction");
+      } catch (error) {
+        toast.error("Error deleting transaction");
+      }
+    };
 
-  const filteredTransactions = transactions.filter(
-    (transaction) =>
-      transaction.user &&
-      transaction.user.fullname &&
-      transaction.user.fullname
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase())
-  );
+    const filteredTransactions = transactions.filter(
+      (transaction) =>
+        transaction.user &&
+        transaction.user.fullname &&
+        transaction.user.fullname
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase())
+    );
 
-  useEffect(() => {
-    fetchTransactions();
-    fetchWasteProducts();
-    fetchUsers();
-  }, []);
+    useEffect(() => {
+      fetchTransactions();
+      fetchWasteProducts();
+      fetchUsers();
+    }, []);
 
-  return (
-    <>
-      <div
-        style={{ backgroundColor: "#EBEBEB" }}
-        className="px-8 flex h-screen"
-      >
-        <Sidebar />
-        <div className="w-full py-4 h-screen">
-          <TransactionHeader
-            onAddClick={handleAddClick}
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-          />
+    return (
+      <>
+        <div
+          style={{ backgroundColor: "#EBEBEB" }}
+          className="px-8 flex h-screen"
+        >
+          <Sidebar />
+          <div className="w-full py-4 h-screen">
+            <TransactionHeader
+              onAddClick={handleAddClick}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+            />
 
-          <TransactionTable
-            isLoading={isLoading}
-            transactions={filteredTransactions}
-            onView={handleViewDetail}
-            onEdit={handleEditClick}
-            onDelete={handleDeleteClick}
-          />
+            <TransactionTable
+              isLoading={isLoading}
+              transactions={filteredTransactions}
+              onView={handleViewDetail}
+              onEdit={handleEditClick}
+              onDelete={handleDeleteClick}
+            />
+          </div>
         </div>
-      </div>
 
-      <DeleteConfirmationModal
-        isOpen={deleteModalState.isOpen}
-        onClose={handleCloseDeleteModal}
-        onConfirm={handleConfirmDelete}
-      />
+        <DeleteConfirmationModal
+          isOpen={deleteModalState.isOpen}
+          onClose={handleCloseDeleteModal}
+          onConfirm={handleConfirmDelete}
+        />
 
-      <TransactionDetailModal
-        isOpen={detailModalState.isOpen}
-        onClose={handleCloseDetailModal}
-        transaction={detailModalState.currentTransaction}
-        wasteProducts={wasteProducts}
-      />
+        <TransactionDetailModal
+          isOpen={detailModalState.isOpen}
+          onClose={handleCloseDetailModal}
+          transaction={detailModalState.currentTransaction}
+          wasteProducts={wasteProducts}
+        />
 
-      <TransactionFormModal
-        isOpen={formModalState.isOpen}
-        onClose={handleCloseFormModal}
-        initialData={formModalState.currentTransaction}
-        users={users}
-        wasteProducts={wasteProducts}
-        onSubmit={handleSubmitTransaction}
-      />
-    </>
-  );
+        <TransactionFormModal
+          isOpen={formModalState.isOpen}
+          onClose={handleCloseFormModal}
+          initialData={formModalState.currentTransaction}
+          users={users}
+          wasteProducts={wasteProducts}
+          onSubmit={handleSubmitTransaction}
+        />
+      </>
+    );
+  };
 };
-
 export default TransactionsManagement;
