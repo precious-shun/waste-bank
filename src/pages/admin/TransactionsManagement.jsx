@@ -884,7 +884,8 @@ const TransactionsManagement = () => {
     } catch (error) {
       toast.error("Error saving transaction");
     }
-
+  };
+  
     const handleConfirmDelete = async () => {
       if (!deleteModalState.transactionToDelete) return;
 
@@ -968,6 +969,5 @@ const TransactionsManagement = () => {
         />
       </>
     );
-  };
 };
 export default TransactionsManagement;
