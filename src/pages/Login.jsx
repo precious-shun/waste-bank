@@ -79,14 +79,18 @@ const Login = () => {
           >
             <CardContent>
               <Typography
-                className="text-center text-2xl font-semibold mb-6"
-                style={{ color: theme.darkGreen }}
+                className="text-center"
+                style={{
+                  color: theme.darkGreen,
+                  fontSize: 30,
+                  fontWeight: 600,
+                }}
               >
                 Login
               </Typography>
               <Typography
                 className="text-center mb-6"
-                style={{ color: theme.darkGreen }}
+                style={{ color: theme.darkGreen, marginBottom: 20 }}
               >
                 Input your email and password
               </Typography>
@@ -122,7 +126,7 @@ const Login = () => {
 
                 <Button
                   size="large"
-                  sx={{ backgroundColor: theme.green }}
+                  sx={{ backgroundColor: theme.green, borderRadius: "10px" }}
                   type="submit"
                   variant="contained"
                   fullWidth
@@ -140,7 +144,11 @@ const Login = () => {
               </Typography>
               <Button
                 size="large"
-                sx={{ backgroundColor: theme.orange, mt: 2 }}
+                sx={{
+                  backgroundColor: theme.orange,
+                  mt: 2,
+                  borderRadius: "10px",
+                }}
                 variant="contained"
                 fullWidth
                 onClick={() => navigate("/register")}

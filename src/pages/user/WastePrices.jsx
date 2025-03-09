@@ -77,17 +77,16 @@ const WastePrices = () => {
       <div className="min-h-screen bg-gray-100 p-6">
         <div className="container mx-auto max-w-6xl">
           <div className="flex flex-col lg:flex-row gap-8">
-            {/* Waste Products List */}
             <div className="w-full lg:w-2/3">
               <span className="text-2xl text-green-900 font-medium">
                 Choose Waste Products
               </span>
-              {/* Testting */}
+
               <div className="grid mt-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {wasteProducts.map((wp) => (
                   <div
                     key={wp.id}
-                    className={`border-2 rounded-lg p-4 cursor-pointer transition-all duration-200 bg-lightgreen ${cart.some((item) => item.waste_product_id === wp.id) ? "bg-normalgreen text-white" : "border-gray-200 text-teal-800 hover:border-gray-400"}`}
+                    className={`border-2 rounded-xl p-4 cursor-pointer transition-all duration-200 bg-lightgreen ${cart.some((item) => item.waste_product_id === wp.id) ? "bg-normalgreen text-white" : "border-gray-200 text-teal-800 hover:border-gray-400"}`}
                     onClick={() => toggleProduct(wp.id)}
                   >
                     <div className="text-center flex flex-col gap-1">
@@ -97,10 +96,8 @@ const WastePrices = () => {
                   </div>
                 ))}
               </div>
-              {/* End Testting */}
             </div>
 
-            {/* Cart Section */}
             <div className="lg:w-1/3 w-full mt-12">
               <div className="border rounded-lg shadow-sm lg:relative fixed bottom-0 left-0 right-0 z-10 lg:z-0">
                 <div
@@ -121,7 +118,6 @@ const WastePrices = () => {
 
                 {isCartOpen && (
                   <div className="bg-white rounded-b-lg">
-                    {/* Cart Items */}
                     <div className="max-h-[50vh] overflow-y-auto p-4">
                       {cart.length === 0 ? (
                         <Typography
@@ -178,7 +174,6 @@ const WastePrices = () => {
                       )}
                     </div>
 
-                    {/* Cart Summary */}
                     <div className="p-4 border-t">
                       <div className="flex justify-between mb-4">
                         <Typography variant="body1" className="font-medium">
@@ -196,7 +191,10 @@ const WastePrices = () => {
                           setCart([]);
                           setValue("total", 0);
                         }}
-                        sx={{ backgroundColor: theme.green }}
+                        sx={{
+                          backgroundColor: theme.green,
+                          borderRadius: "10px",
+                        }}
                         variant="contained"
                         fullWidth
                         disabled={cart.length === 0}

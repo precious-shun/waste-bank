@@ -34,7 +34,7 @@ const Homepage = () => {
   const [transactions, setTrans] = useState([]);
   const [latestTransaction, setLatestTransaction] = useState(null);
   const { user } = useAuth();
-  const [fullname, setFullname] = useState("Guest"); // New state for fullname
+  const [fullname, setFullname] = useState("Guest");
 
   console.log("Current User UID:", user?.uid);
 
@@ -49,25 +49,22 @@ const Homepage = () => {
             where("user_id", "==", doc(db, "users", user.uid))
           )
         );
-        const transactionsList = []; // Temporary array to store transactions
+        const transactionsList = [];
 
         for (const docSnapshot of querySnapshot.docs) {
           const data = docSnapshot.data();
-          const wasteProducts = data.waste_products || []; // Array of waste products
+          const wasteProducts = data.waste_products || [];
+          let wasteProductDetails = [];
 
-          // let fullfname = "Unknown"; // Default value
-          let wasteProductDetails = []; // To store transformed waste products
-
-          // Fetch Waste Products Data
           wasteProductDetails = await Promise.all(
             wasteProducts.map(async (wp) => {
-              let wasteName = "Unknown"; // Default waste name
+              let wasteName = "Unknown";
 
               if (wp.waste_product_id) {
                 try {
                   const wasteSnap = await getDoc(wp.waste_product_id);
                   if (wasteSnap.exists()) {
-                    wasteName = wasteSnap.data().waste; // Get waste name
+                    wasteName = wasteSnap.data().waste;
                   }
                 } catch (err) {
                   console.error("Error fetching waste data:", err);
@@ -77,30 +74,27 @@ const Homepage = () => {
               return {
                 quantity: wp.quantity,
                 subtotal: wp.subtotal,
-                waste: wasteName, // Replace waste_product_id with waste name
+                waste: wasteName,
               };
             })
           );
 
-          // Store transaction in the temporary array
           transactionsList.push({
             id: docSnapshot.id,
             date: data.date.toDate(),
             total: data.total,
-            fullname, // Store fullname instead of user_id
-            waste_products: wasteProductDetails, // Store waste details instead of waste_product_id
+            fullname,
+            waste_products: wasteProductDetails,
           });
         }
 
-        // Update state once with all transactions
-        setTrans(transactionsList); // Keep all transactions
+        setTrans(transactionsList);
 
-        // Find latest transaction
         if (transactionsList.length > 0) {
           const sortedTransactions = transactionsList.sort(
             (a, b) => b.date - a.date
           );
-          setLatestTransaction(sortedTransactions[0]); // Store latest transaction
+          setLatestTransaction(sortedTransactions[0]);
         }
       } catch (error) {
         console.error("Error fetching transactions:", error);
@@ -126,7 +120,7 @@ const Homepage = () => {
     };
 
     fetchUserFullname();
-  }, [user]); // Runs when the user changes
+  }, [user]);
 
   const totalBalance = transactions.reduce(
     (sum, transaction) => sum + transaction.total,
@@ -137,7 +131,6 @@ const Homepage = () => {
       <Navbar />
 
       <Box sx={{ p: 3 }}>
-        {/* Greeting Section */}
         <Typography
           variant="h4"
           sx={{ color: colors.darkGreen, fontWeight: "bold" }}
@@ -145,13 +138,13 @@ const Homepage = () => {
           Selamat datang, {fullname || "Guest"}!
         </Typography>
 
-        {/* Account Balance */}
         <Paper
           sx={{
             p: 2,
             mt: 2,
             backgroundColor: colors.white,
             borderLeft: `5px solid ${colors.green}`,
+            borderRadius: "10px",
           }}
         >
           <Typography variant="h6" sx={{ color: colors.green }}>
@@ -166,7 +159,14 @@ const Homepage = () => {
         </Paper>
 
         {/* Transaction History */}
-        <Paper sx={{ p: 2, mt: 3, backgroundColor: colors.white }}>
+        <Paper
+          sx={{
+            p: 2,
+            mt: 3,
+            backgroundColor: colors.white,
+            borderRadius: "20px",
+          }}
+        >
           <Typography variant="h6" sx={{ color: colors.green, mb: 1 }}>
             Transaksi Terbaru
           </Typography>

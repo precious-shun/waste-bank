@@ -70,7 +70,7 @@ const UserProfile = () => {
     <>
       <Navbar />
       <div className="bg-gray-200 py-8">
-        <div className="bg-white mx-8 p-8 rounded-xl">
+        <div className="bg-white mx-8 p-8 rounded-2xl">
           <span className="text-green-800 font-bold text-2xl">My Profile</span>
           <div className="border border-1 mt-6 p-6 rounded-lg gap-4 flex flex-col">
             <div className="flex items-center">
@@ -124,6 +124,7 @@ const UserProfile = () => {
                 marginLeft: "auto",
                 textTransform: "none",
                 backgroundColor: theme.green,
+                borderRadius: "10px",
               }}
               onClick={() => setOpenDialog(true)}
             >
