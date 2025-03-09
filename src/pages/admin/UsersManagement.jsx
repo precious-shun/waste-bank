@@ -67,14 +67,37 @@ const tableHead = [
 const UsersManagement = () => {
   const [users, setUsers] = useState([]);
 
+  const getUserBalance = async (userId) => {
+    try {
+      const userRef = doc(db, "users", userId);
+
+      const transactionsRef = collection(db, "transactions");
+      const q = query(transactionsRef, where("user_id", "==", userRef));
+
+      const querySnapshot = await getDocs(q);
+
+      let totalBalance = 0;
+      querySnapshot.forEach((doc) => {
+        totalBalance += doc.data().total;
+      });
+
+      return totalBalance;
+    } catch (error) {
+      toast.error("Error fetching data");
+      return 0;
+    }
+  };
+
   const fetchData = async () => {
-    await getDocs(collection(db, "users")).then((querySnapshot) => {
-      const data = querySnapshot.docs.map((doc) => ({
-        ...doc.data(),
-        id: doc.id,
-      }));
-      setUsers(data);
-    });
+    const usersSnapshot = await getDocs(collection(db, "users"));
+    const usersData = await Promise.all(
+      usersSnapshot.docs.map(async (userDoc) => {
+        const user = { ...userDoc.data(), id: userDoc.id };
+        user.balance = await getUserBalance(user.id);
+        return user;
+      })
+    );
+    setUsers(usersData);
   };
 
   const [editUserData, setEditUserData] = useState({});
@@ -214,11 +237,14 @@ const UsersManagement = () => {
               </TableHead>
               <TableBody>
                 {filteredUsers.length === 0 ? (
-                  <TableRow >
-                    <TableCell sx={{border: 0}}>
-                      <p className="text-center text-green-900 text-lg left-1/2 ms-14 top-1/2 absolute" aria-label="simple table">
+                  <TableRow>
+                    <TableCell sx={{ border: 0 }}>
+                      <p
+                        className="text-center text-green-900 text-lg left-1/2 ms-14 top-1/2 absolute"
+                        aria-label="simple table"
+                      >
                         User not found
-                       </p>
+                      </p>
                     </TableCell>
                   </TableRow>
                 ) : (
