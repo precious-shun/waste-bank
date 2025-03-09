@@ -541,42 +541,35 @@ const TransactionFormModal = ({
   );
 
   useEffect(() => {
-    if (initialData) {
-      const user = users.find((u) => u.id === initialData.user?.id);
-      const transactionDateObj = initialData.date || new Date();
-      const formattedDate = transactionDateObj.toISOString().split("T")[0];
-
-      let items = [{ waste_product_id: null, quantity: 1, subtotal: 0 }];
-
-      if (initialData.waste_products && initialData.waste_products.length > 0) {
-        items = initialData.waste_products.map((item) => {
-          const wasteProductId = item.waste_product_id?.id;
-          const wasteProduct = wasteProducts.find(
-            (wp) => wp.id === wasteProductId
-          );
-          return {
-            waste_product_id: wasteProduct || null,
+    if (isOpen) {
+      if (initialData) {
+        // Set data jika sedang edit transaksi
+        reset({
+          transactionDate: initialData.date
+            ? initialData.date.toISOString().split("T")[0]
+            : new Date().toISOString().split("T")[0],
+          selectedUser:
+            users.find((u) => u.id === initialData.user?.id) || null,
+          transactionItems: initialData.waste_products?.map((item) => ({
+            waste_product_id:
+              wasteProducts.find((wp) => wp.id === item.waste_product_id?.id) ||
+              null,
             quantity: item.quantity || 1,
             subtotal: item.subtotal || 0,
-          };
+          })) || [{ waste_product_id: null, quantity: 1, subtotal: 0 }],
+        });
+      } else {
+        // Reset form jika transaksi baru
+        reset({
+          transactionDate: new Date().toISOString().split("T")[0],
+          selectedUser: null,
+          transactionItems: [
+            { waste_product_id: null, quantity: 1, subtotal: 0 },
+          ],
         });
       }
-
-      reset({
-        transactionDate: formattedDate,
-        selectedUser: user || null,
-        transactionItems: items,
-      });
-    } else {
-      reset({
-        transactionDate: new Date().toISOString().split("T")[0],
-        selectedUser: null,
-        transactionItems: [
-          { waste_product_id: null, quantity: 1, subtotal: 0 },
-        ],
-      });
     }
-  }, [initialData, reset, users, wasteProducts]);
+  }, [isOpen, initialData, reset, users, wasteProducts]);
 
   const addWasteProductItem = () => {
     append({ waste_product_id: null, quantity: 1, subtotal: 0 });
