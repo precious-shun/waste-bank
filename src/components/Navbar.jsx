@@ -14,9 +14,13 @@ const colors = {
 };
 
 const Navbar = () => {
-  const { handleLogout } = useAuth();
+  const { logout } = useAuth();
 
   const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+  };
 
   return (
     <AppBar
