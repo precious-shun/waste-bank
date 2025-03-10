@@ -444,14 +444,23 @@ const NotificationsManagement = () => {
   };
 
   const handleEditClick = (notification) => {
-    const dateObj = notification.date?.toDate();
+    let dateObj;
 
-    const formattedDate = dateObj
-      ? `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(
-          2,
-          "0"
-        )}-${String(dateObj.getDate()).padStart(2, "0")}`
-      : "";
+    if (notification.date?.toDate) {
+      dateObj = notification.date.toDate();
+    } else if (notification.date instanceof Date) {
+      dateObj = notification.date;
+    } else if (
+      typeof notification.date === "string" ||
+      typeof notification.date === "number"
+    ) {
+      dateObj = new Date(notification.date);
+    } else {
+      console.error("Invalid date format:", notification.date);
+      dateObj = new Date(); // Default jika tidak valid
+    }
+
+    const formattedDate = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, "0")}-${String(dateObj.getDate()).padStart(2, "0")}`;
 
     const userIds = notification.formattedRecipients
       ?.map((recipient) => recipient.userId || "")
