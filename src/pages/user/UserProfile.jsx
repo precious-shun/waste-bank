@@ -70,16 +70,16 @@ const UserProfile = () => {
     <>
       <Navbar />
       <div className="bg-gray-200 py-8">
-        <div className="bg-white mx-8 p-8 rounded-xl">
+        <div className="bg-white mx-8 p-8 rounded-2xl">
           <span className="text-green-800 font-bold text-2xl">My Profile</span>
           <div className="border border-1 mt-6 p-6 rounded-lg gap-4 flex flex-col">
-            <div className="flex items-center">
+            <div className="sm:flex sm:items-center">
               <span className="w-1/6">Profile Picture</span>
               <Avatar sx={{ width: 48, height: 48 }} />
             </div>
 
             <Divider />
-            <div className="flex items-center">
+            <div className="sm:flex sm:items-center">
               <span className="w-1/5">Name</span>
               <TextField
                 fullWidth
@@ -89,7 +89,7 @@ const UserProfile = () => {
               />
             </div>
             <Divider />
-            <div className="flex items-center">
+            <div className="sm:flex sm:items-center">
               <span className="w-1/5">Address</span>
               <TextField
                 fullWidth
@@ -99,7 +99,7 @@ const UserProfile = () => {
               />
             </div>
             <Divider />
-            <div className="flex items-center">
+            <div className="sm:flex sm:items-center">
               <span className="w-1/5">Email</span>
               <TextField
                 fullWidth
@@ -109,7 +109,7 @@ const UserProfile = () => {
               />
             </div>
             <Divider />
-            <div className="flex items-center mb-1.5">
+            <div className="sm:flex sm:items-center mb-1.5">
               <span className="w-1/5">Gender</span>
               <TextField
                 fullWidth
@@ -124,6 +124,7 @@ const UserProfile = () => {
                 marginLeft: "auto",
                 textTransform: "none",
                 backgroundColor: theme.green,
+                borderRadius: "10px",
               }}
               onClick={() => setOpenDialog(true)}
             >

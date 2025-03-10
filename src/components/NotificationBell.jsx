@@ -97,7 +97,7 @@ const NotificationBell = () => {
         </Badge>
       </IconButton>
       {open && (
-        <Paper className="absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto shadow-lg">
+        <Paper className="absolute z-50 right-0 mt-2 w-80 max-h-96 overflow-y-auto shadow-lg">
           {notifications.length === 0 ? (
             <Typography variant="body2" className="p-4">
               There's no notification
