@@ -21,7 +21,7 @@ import Sidebar from "../../components/Sidebar";
 
 import { useEffect, useState } from "react";
 //firebase
-import { db } from "../../firebase";
+import { db } from "../../services/firebase";
 import { collection, query, orderBy, limit, getDocs } from "firebase/firestore";
 import { toast } from "sonner";
 

@@ -12,7 +12,7 @@ import Navbar from "../../components/Navbar";
 import { theme } from "../../theme";
 import { useAuth } from "../../context/AuthContext";
 import { useState, useEffect } from "react";
-import { db } from "../../firebase";
+import { db } from "../../services/firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 
 const UserProfile = () => {

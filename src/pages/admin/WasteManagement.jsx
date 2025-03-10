@@ -2,7 +2,7 @@ import Sidebar from "../../components/Sidebar";
 
 import { Box, Button, Modal, TextField } from "@mui/material";
 
-import { db } from "../../firebase";
+import { db } from "../../services/firebase";
 import {
   doc,
   collection,

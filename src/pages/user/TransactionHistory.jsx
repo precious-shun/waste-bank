@@ -6,7 +6,7 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import { useEffect, useState } from "react";
-import { db } from "../../firebase";
+import { db } from "../../services/firebase";
 import { EyeIcon } from "@heroicons/react/24/solid";
 import {
   collection,

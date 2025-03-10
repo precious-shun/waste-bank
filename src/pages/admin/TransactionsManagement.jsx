@@ -17,7 +17,7 @@ import {
   Autocomplete,
 } from "@mui/material";
 
-import { db } from "../../firebase";
+import { db } from "../../services/firebase";
 
 import {
   doc,

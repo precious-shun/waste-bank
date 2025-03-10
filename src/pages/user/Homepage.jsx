@@ -16,7 +16,7 @@ import {
   query,
   where,
 } from "firebase/firestore";
-import { db, auth } from "../../firebase";
+import { db, auth } from "../../services/firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";

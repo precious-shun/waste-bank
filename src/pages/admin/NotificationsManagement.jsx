@@ -22,7 +22,6 @@ import {
   Divider,
 } from "@mui/material";
 
-import { db } from "../../firebase";
 import {
   doc,
   collection,
@@ -40,6 +39,7 @@ import { formatDate } from "../../utils/formatDate";
 import ManagementTable from "../../components/common/ManagementTable";
 import { boxStyle, theme } from "../../utils/styles";
 import { notificationSchema } from "../../schemas/NotificationSchema";
+import { db } from "../../services/firebase";
 
 const NotificationFormModal = ({
   isOpen,

@@ -16,6 +16,7 @@ import {
   PencilSquareIcon,
   TrashIcon,
 } from "@heroicons/react/24/solid";
+import Loading from "../Loading";
 
 const ManagementTable = ({
   data = [],
@@ -81,7 +82,7 @@ const ManagementTable = ({
             {loading ? (
               <TableRow>
                 <TableCell colSpan={header.length + 1} align="center">
-                  Loading...
+                  <Loading />
                 </TableCell>
               </TableRow>
             ) : data.length === 0 ? (
