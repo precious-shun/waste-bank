@@ -3,14 +3,9 @@ import Box from "@mui/material/Box";
 
 const Loading = () => {
   return (
-    <Box
-      display="flex"
-      justifyContent="center"
-      alignItems="center"
-      height="100vh"
-    >
+    <div className="flex justify-center items-center h-full">
       <CircularProgress sx={{ color: "#2C514B" }} />
-    </Box>
+    </div>
   );
 };
 

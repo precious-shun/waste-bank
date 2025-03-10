@@ -6,7 +6,11 @@ const PublicRoute = () => {
   const { user, role, isLoading } = useAuth();
 
   if (isLoading) {
-    return <Loading />;
+    return (
+      <div className="h-screen">
+        <Loading />
+      </div>
+    );
   }
 
   if (user && role) {

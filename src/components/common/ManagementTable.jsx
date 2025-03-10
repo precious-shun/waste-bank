@@ -49,8 +49,8 @@ const ManagementTable = ({
         sx={{
           backgroundColor: theme.lightGreen,
           borderRadius: "20px",
-          maxHeight: "calc(100vh - 200px)",
-          ...containerSx,
+          maxHeight: "calc(100vh - 210px)",
+          // ...containerSx,
         }}
       >
         <Table
