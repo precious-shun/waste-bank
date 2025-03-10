@@ -586,7 +586,7 @@ const NotificationsManagement = () => {
     <>
       <div
         style={{ backgroundColor: theme.lightGrey }}
-        className="px-4 md:px-8 flex flex-col md:flex-row h-screen"
+        className="px-4 md:px-8 flex h-screen"
       >
         <Sidebar />
         <div className="w-full py-4 h-full overflow-auto">

@@ -72,6 +72,22 @@ const Sidebar = () => {
     logout();
   };
 
+  useEffect(() => {
+    function handleResize() {
+      if (window.innerWidth > 640) {
+        document.body.style.overflow = "unset";
+      } else {
+        document.body.style.overflow = "hidden";
+      }
+    }
+
+    handleResize();
+
+    window.addEventListener("resize", handleResize);
+
+    return () => window.removeEventListener("resize", handleResize);
+  },[])
+
   return (
     <>
       <button
@@ -79,11 +95,11 @@ const Sidebar = () => {
           setIsMenuOpen((prev) => !prev);
           document.body.style.overflow = "hidden";
         }}
-        className="sm:hidden absolute right-10 top-6"
+        className="sm:hidden absolute right-6 top-6"
       >
         <Bars3Icon style={{ color: colors.darkGreen }} className="size-6" />
       </button>
-      <div className={`${isMenuOpen ? "absolute" : "hidden"} sm:flex`}>
+      <div className={`${isMenuOpen ? "absolute sm:max-sm:hidden sm:static" : "hidden"} sm:flex`}>
         <Box sx={{ display: "flex" }}>
           <CssBaseline />
           <button

@@ -140,7 +140,7 @@ const Dashboard = () => {
     <>
       <div
         style={{ backgroundColor: "#EBEBEB" }}
-        className="px-8 flex h-screen"
+        className="px-4 md:px-8 flex h-screen"
       >
         <Sidebar />
         <div className="w-full py-4 h-screen">
