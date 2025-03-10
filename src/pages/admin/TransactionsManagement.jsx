@@ -7,6 +7,7 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import Sidebar from "../../components/Sidebar";
 import { PlusIcon, MinusIcon } from "@heroicons/react/24/solid";
+import DeleteIcon from "@mui/icons-material/Delete";
 import {
   Box,
   Button,
@@ -228,7 +229,7 @@ const TransactionFormItem = ({
         onClick={() => onRemove(index)}
         disabled={!canRemove}
       >
-        <MinusIcon className="size-5" />
+        <DeleteIcon className="size-5" />
       </IconButton>
     </div>
   );
