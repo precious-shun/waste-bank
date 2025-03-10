@@ -12,7 +12,14 @@ import {
   PencilSquareIcon,
   TrashIcon,
 } from "@heroicons/react/24/solid";
-import { Box, Button, Modal, TextField, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Modal,
+  TablePagination,
+  TextField,
+  Typography,
+} from "@mui/material";
 
 import { db } from "../../firebase";
 import {
@@ -53,6 +60,18 @@ const WasteManagement = () => {
   const [price, setPrice] = useState("");
   const [editingWaste, setEditingWaste] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(+event.target.value);
+    setPage(0);
+  };
 
   const handleAddWaste = async () => {
     if (!waste || !unit || !price) return;
@@ -260,53 +279,71 @@ const WasteManagement = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {filteredWastes.map((waste, index) => {
-                  return (
-                    <TableRow key={index}>
-                      <TableCell>{waste.waste}</TableCell>
-                      <TableCell>{waste.unit}</TableCell>
-                      <TableCell>{Rupiah.format(waste.price)}</TableCell>
-                      <TableCell align="right" sx={{ display: "flex", gap: 1 }}>
-                        <Button
-                          onClick={() => {
-                            setDeleteTarget(waste);
-                            confirmOpen();
-                          }}
-                          sx={{
-                            backgroundColor: "#4E7972",
-                            borderRadius: 100,
-                            height: 34,
-                            textTransform: "none",
-                          }}
-                          variant="contained"
+                {filteredWastes
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((waste, index) => {
+                    return (
+                      <TableRow key={index}>
+                        <TableCell>{waste.waste}</TableCell>
+                        <TableCell>{waste.unit}</TableCell>
+                        <TableCell>{Rupiah.format(waste.price)}</TableCell>
+                        <TableCell
+                          align="right"
+                          sx={{ display: "flex", gap: 1 }}
                         >
-                          <TrashIcon className="size-5" />
-                          <span className="ms-1.5 mt-0.5">Delete</span>
-                        </Button>
-                        <Button
-                          onClick={() => handleEdit(waste)}
-                          sx={{
-                            backgroundColor: "#4E7972",
-                            borderRadius: 100,
-                            height: 34,
-                            textTransform: "none",
-                          }}
-                          variant="contained"
-                        >
-                          <PencilSquareIcon className="size-5" />
-                          <span className="ms-1.5 mt-0.5">Edit</span>
-                        </Button>
-                      </TableCell>
+                          <Button
+                            onClick={() => {
+                              setDeleteTarget(waste);
+                              confirmOpen();
+                            }}
+                            sx={{
+                              backgroundColor: "#4E7972",
+                              borderRadius: 100,
+                              height: 34,
+                              textTransform: "none",
+                            }}
+                            variant="contained"
+                          >
+                            <TrashIcon className="size-5" />
+                            <span className="ms-1.5 mt-0.5">Delete</span>
+                          </Button>
+                          <Button
+                            onClick={() => handleEdit(waste)}
+                            sx={{
+                              backgroundColor: "#4E7972",
+                              borderRadius: 100,
+                              height: 34,
+                              textTransform: "none",
+                            }}
+                            variant="contained"
+                          >
+                            <PencilSquareIcon className="size-5" />
+                            <span className="ms-1.5 mt-0.5">Edit</span>
+                          </Button>
+                        </TableCell>
 
-                      {/* <TableCell>{waste.quantity}</TableCell>
+                        {/* <TableCell>{waste.quantity}</TableCell>
                       <TableCell>{Rupiah.format(parseInt(waste.price) * parseInt(waste.quantity))}</TableCell>
                       <TableCell>{waste.role}</TableCell> */}
-                    </TableRow>
-                  );
-                })}
+                      </TableRow>
+                    );
+                  })}
               </TableBody>
             </Table>
           </TableContainer>
+          <TablePagination
+            sx={{
+              backgroundColor: "#ffffff",
+              borderRadius: "20px",
+              marginTop: 1,
+            }}
+            component="div"
+            count={filteredWastes.length}
+            page={page}
+            onPageChange={handleChangePage}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
         </div>
       </div>
 
