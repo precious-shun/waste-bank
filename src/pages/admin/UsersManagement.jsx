@@ -52,6 +52,8 @@ const boxStyle = {
   boxShadow: 24,
   borderRadius: 4,
   p: 4,
+  maxHeight: "80vh",
+  overflow: "auto",
 };
 
 const tableHead = [

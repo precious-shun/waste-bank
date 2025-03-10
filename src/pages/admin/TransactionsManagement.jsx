@@ -6,25 +6,13 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import Sidebar from "../../components/Sidebar";
-import {
-  UserPlusIcon,
-  MagnifyingGlassIcon,
-  PencilSquareIcon,
-  TrashIcon,
-  EyeIcon,
-  PlusIcon,
-  MinusIcon,
-} from "@heroicons/react/24/solid";
+import { PlusIcon, MinusIcon } from "@heroicons/react/24/solid";
 import {
   Box,
   Button,
   Modal,
   TextField,
   Typography,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   IconButton,
   Autocomplete,
 } from "@mui/material";
@@ -39,239 +27,19 @@ import {
   addDoc,
   updateDoc,
   deleteDoc,
-  query,
-  where,
   Timestamp,
-  serverTimestamp,
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-
-const theme = {
-  darkGreen: "#2C514B",
-  green: "#4E7972",
-  lightGreen: "#C2D1C8",
-  orange: "#D66C42",
-  lightGrey: "#ebebeb",
-  white: "#ffffff",
-};
-
-const boxStyle = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: 500,
-  bgcolor: "background.paper",
-  boxShadow: 24,
-  borderRadius: 4,
-  p: 4,
-  maxHeight: "80vh",
-  overflowY: "auto",
-};
-
-const formatCurrency = new Intl.NumberFormat("id-ID", {
-  style: "currency",
-  currency: "IDR",
-  minimumFractionDigits: 0,
-});
-
-const TransactionHeader = ({ onAddClick, searchQuery, onSearchChange }) => {
-  return (
-    <>
-      <div className="text-2xl font-bold mb-4 text-green-900">Transactions</div>
-      <div className="mb-6 flex flex-row gap-4">
-        <Button
-          onClick={onAddClick}
-          sx={{
-            backgroundColor: theme.green,
-            borderRadius: 100,
-            width: 280,
-            textTransform: "none",
-          }}
-          startIcon={<UserPlusIcon className="size-5" />}
-          variant="contained"
-        >
-          Add Transaction
-        </Button>
-        <Paper elevation="0" sx={{ borderRadius: 100, width: "100%" }}>
-          <TextField
-            fullWidth
-            placeholder="Search by user name"
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <MagnifyingGlassIcon
-                    style={{ color: theme.orange }}
-                    className="size-5 mr-2"
-                  />
-                ),
-              },
-            }}
-            sx={{
-              "& fieldset": { borderRadius: 100 },
-              input: { "&::placeholder": { color: theme.orange } },
-            }}
-            size="small"
-          />
-        </Paper>
-      </div>
-    </>
-  );
-};
-
-const TransactionTable = ({
-  isLoading,
-  transactions,
-  onView,
-  onEdit,
-  onDelete,
-}) => {
-  return (
-    <TableContainer
-      elevation="0"
-      sx={{
-        backgroundColor: theme.lightGreen,
-        height: "80%",
-        borderRadius: "20px",
-      }}
-      component={Paper}
-    >
-      <Table
-        stickyHeader
-        sx={{ minWidth: 650 }}
-        aria-label="transactions table"
-      >
-        <TableHead>
-          <TableRow>
-            <TableCell sx={{ backgroundColor: theme.lightGreen }}>
-              <b>Date</b>
-            </TableCell>
-            <TableCell sx={{ backgroundColor: theme.lightGreen }}>
-              <b>User</b>
-            </TableCell>
-            <TableCell sx={{ backgroundColor: theme.lightGreen }}>
-              <b>Total</b>
-            </TableCell>
-            <TableCell sx={{ backgroundColor: theme.lightGreen }}></TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {isLoading ? (
-            <TableRow>
-              <TableCell colSpan={4} align="center">
-                Loading...
-              </TableCell>
-            </TableRow>
-          ) : transactions.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={4} align="center">
-                No transactions found
-              </TableCell>
-            </TableRow>
-          ) : (
-            transactions.map((transaction, index) => (
-              <TableRow key={index}>
-                <TableCell>
-                  {transaction.date
-                    ? transaction.date.toLocaleDateString("id-ID", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })
-                    : "-"}
-                </TableCell>
-                <TableCell>{transaction.user?.fullname || "-"}</TableCell>
-                <TableCell>
-                  {formatCurrency.format(transaction.total || 0)}
-                </TableCell>
-                <TableCell align="right" sx={{ display: "flex", gap: 1 }}>
-                  <Button
-                    onClick={() => onDelete(transaction)}
-                    sx={{
-                      backgroundColor: theme.green,
-                      borderRadius: 100,
-                      height: 34,
-                      textTransform: "none",
-                    }}
-                    variant="contained"
-                  >
-                    <TrashIcon className="size-5" />
-                    <span className="ms-1.5 mt-0.5">Delete</span>
-                  </Button>
-                  <Button
-                    onClick={() => onEdit(transaction)}
-                    sx={{
-                      backgroundColor: theme.green,
-                      borderRadius: 100,
-                      height: 34,
-                      textTransform: "none",
-                    }}
-                    variant="contained"
-                  >
-                    <PencilSquareIcon className="size-5" />
-                    <span className="ms-1.5 mt-0.5">Edit</span>
-                  </Button>
-                  <Button
-                    onClick={() => onView(transaction)}
-                    sx={{
-                      backgroundColor: theme.green,
-                      borderRadius: 100,
-                      height: 34,
-                      textTransform: "none",
-                    }}
-                    variant="contained"
-                  >
-                    <EyeIcon className="size-5" />
-                    <span className="ms-1.5 mt-0.5">View</span>
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
-    </TableContainer>
-  );
-};
-
-const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm }) => {
-  return (
-    <Modal
-      open={isOpen}
-      onClose={onClose}
-      aria-labelledby="delete-confirmation-title"
-      aria-describedby="delete-confirmation-description"
-    >
-      <Box sx={boxStyle}>
-        <Typography id="delete-confirmation-title" variant="h6" component="h2">
-          Are you sure you want to delete this transaction?
-        </Typography>
-
-        <Button
-          variant="contained"
-          sx={{ mt: 2, mr: 2, backgroundColor: theme.darkGreen }}
-          onClick={onConfirm}
-        >
-          Yes
-        </Button>
-        <Button
-          variant="contained"
-          color="error"
-          sx={{ mt: 2 }}
-          onClick={onClose}
-        >
-          No
-        </Button>
-      </Box>
-    </Modal>
-  );
-};
+import ManagementHeader from "../../components/common/ManagementHeader";
+import DeleteConfirmationModal from "../../components/common/DeleteConfirmationModal";
+import ManagementTable from "../../components/common/ManagementTable";
+import { formatDate } from "../../utils/formatDate";
+import { formatCurrency } from "../../utils/formatCurrency";
+import { TransactionSchema } from "../../schemas/TransactionSchema";
+import { boxStyle, theme } from "../../utils/styles";
 
 const TransactionDetailModal = ({
   isOpen,
@@ -312,8 +80,7 @@ const TransactionDetailModal = ({
             <strong>User:</strong> {transaction.user?.fullname}
           </Typography>
           <Typography variant="subtitle1">
-            <strong>Total:</strong>{" "}
-            {formatCurrency.format(transaction.total || 0)}
+            <strong>Total:</strong> {formatCurrency(transaction.total || 0)}
           </Typography>
         </div>
 
@@ -354,10 +121,10 @@ const TransactionDetailModal = ({
                         {item.quantity} {wasteProduct?.unit || ""}
                       </TableCell>
                       <TableCell>
-                        {formatCurrency.format(wasteProduct?.price || 0)}
+                        {formatCurrency(wasteProduct?.price || 0)}
                       </TableCell>
                       <TableCell>
-                        {formatCurrency.format(item.subtotal || 0)}
+                        {formatCurrency(item.subtotal || 0)}
                       </TableCell>
                     </TableRow>
                   );
@@ -367,7 +134,7 @@ const TransactionDetailModal = ({
         </TableContainer>
 
         <Typography variant="h6" sx={{ textAlign: "right" }}>
-          Total: {formatCurrency.format(transaction.total || 0)}
+          Total: {formatCurrency(transaction.total || 0)}
         </Typography>
 
         <Button
@@ -382,41 +149,6 @@ const TransactionDetailModal = ({
     </Modal>
   );
 };
-
-const TransactionSchema = z.object({
-  transactionDate: z.string().nonempty("Date is required"),
-  selectedUser: z
-    .object({
-      id: z.string(),
-      fullname: z.string(),
-    })
-    .nullable()
-    .refine((val) => val !== null, {
-      message: "User is required",
-    }),
-  transactionItems: z
-    .array(
-      z.object({
-        waste_product_id: z
-          .object({
-            id: z.string(),
-            waste: z.string(),
-            price: z.number(),
-            unit: z.string().optional(),
-          })
-          .nullable()
-          .refine((val) => val !== null, {
-            message: "Product is required",
-          }),
-        quantity: z
-          .number()
-          .min(1, "Quantity must be at least 1")
-          .or(z.string().transform((val) => parseInt(val) || 0)),
-        subtotal: z.number().optional(),
-      })
-    )
-    .min(1, "At least one product is required"),
-});
 
 const TransactionFormItem = ({
   index,
@@ -488,9 +220,7 @@ const TransactionFormItem = ({
       />
 
       <Typography sx={{ flex: 1.5 }}>
-        {formatCurrency.format(
-          getValues(`transactionItems.${index}.subtotal`) || 0
-        )}
+        {formatCurrency(getValues(`transactionItems.${index}.subtotal`) || 0)}
       </Typography>
 
       <IconButton
@@ -540,6 +270,18 @@ const TransactionFormModal = ({
     (sum, item) => sum + (item.subtotal || 0),
     0
   );
+
+  useEffect(() => {
+    if (isOpen) {
+      reset({
+        transactionDate: new Date().toISOString().split("T")[0],
+        selectedUser: null,
+        transactionItems: [
+          { waste_product_id: null, quantity: 1, subtotal: 0 },
+        ],
+      });
+    }
+  }, [isOpen, reset]);
 
   useEffect(() => {
     if (initialData) {
@@ -694,7 +436,7 @@ const TransactionFormModal = ({
           </Button>
 
           <Typography variant="h6" sx={{ textAlign: "right", mb: 3 }}>
-            Total: {formatCurrency.format(transactionTotal)}
+            Total: {formatCurrency(transactionTotal)}
           </Typography>
 
           <Button
@@ -885,89 +627,101 @@ const TransactionsManagement = () => {
       toast.error("Error saving transaction");
     }
   };
-  
-    const handleConfirmDelete = async () => {
-      if (!deleteModalState.transactionToDelete) return;
 
-      try {
-        await deleteDoc(
-          doc(db, "transactions", deleteModalState.transactionToDelete.id)
-        );
+  const handleConfirmDelete = async () => {
+    if (!deleteModalState.transactionToDelete) return;
 
-        setTransactions((prevTransactions) =>
-          prevTransactions.filter(
-            (item) => item.id !== deleteModalState.transactionToDelete.id
-          )
-        );
+    try {
+      await deleteDoc(
+        doc(db, "transactions", deleteModalState.transactionToDelete.id)
+      );
 
-        handleCloseDeleteModal();
-        toast.success("Suscces deleting transaction");
-      } catch (error) {
-        toast.error("Error deleting transaction");
-      }
-    };
+      setTransactions((prevTransactions) =>
+        prevTransactions.filter(
+          (item) => item.id !== deleteModalState.transactionToDelete.id
+        )
+      );
 
-    const filteredTransactions = transactions.filter(
-      (transaction) =>
-        transaction.user &&
-        transaction.user.fullname &&
-        transaction.user.fullname
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase())
-    );
+      handleCloseDeleteModal();
+      toast.success("Suscces deleting transaction");
+    } catch (error) {
+      toast.error("Error deleting transaction");
+    }
+  };
 
-    useEffect(() => {
-      fetchTransactions();
-      fetchWasteProducts();
-      fetchUsers();
-    }, []);
+  const filteredTransactions = transactions.filter(
+    (transaction) =>
+      transaction.user &&
+      transaction.user.fullname &&
+      transaction.user.fullname
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase())
+  );
 
-    return (
-      <>
-        <div
-          style={{ backgroundColor: "#EBEBEB" }}
-          className="px-8 flex h-screen"
-        >
-          <Sidebar />
-          <div className="w-full py-4 h-screen">
-            <TransactionHeader
-              onAddClick={handleAddClick}
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
-            />
+  useEffect(() => {
+    fetchTransactions();
+    fetchWasteProducts();
+    fetchUsers();
+  }, []);
 
-            <TransactionTable
-              isLoading={isLoading}
-              transactions={filteredTransactions}
-              onView={handleViewDetail}
-              onEdit={handleEditClick}
-              onDelete={handleDeleteClick}
-            />
-          </div>
+  return (
+    <>
+      <div
+        style={{ backgroundColor: "#EBEBEB" }}
+        className="px-4 md:px-8 flex flex-col md:flex-row h-screen"
+      >
+        <Sidebar />
+        <div className="w-full py-4 h-full overflow-auto">
+          <ManagementHeader
+            title="Transaction"
+            buttonLabel="Add Transaction"
+            onAddClick={handleAddClick}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+          />
+          <ManagementTable
+            data={filteredTransactions}
+            header={["Date", "User", "Total"]}
+            cell={[
+              (row) => formatDate(row.date),
+              (row) => row.user?.fullname,
+              (row) => formatCurrency(row.total),
+            ]}
+            actions={{
+              onView: handleViewDetail,
+              onEdit: handleEditClick,
+              onDelete: handleDeleteClick,
+            }}
+            loading={isLoading}
+            emptyMessage="No transactions found"
+            containerSx={{ height: "70vh" }}
+          />
         </div>
+      </div>
 
-        <DeleteConfirmationModal
-          isOpen={deleteModalState.isOpen}
-          onClose={handleCloseDeleteModal}
-          onConfirm={handleConfirmDelete}
-        />
+      <DeleteConfirmationModal
+        isOpen={deleteModalState.isOpen}
+        onClose={handleCloseDeleteModal}
+        onConfirm={handleConfirmDelete}
+      />
 
-        <TransactionDetailModal
-          isOpen={detailModalState.isOpen}
-          onClose={handleCloseDetailModal}
-          transaction={detailModalState.currentTransaction}
-          wasteProducts={wasteProducts}
-        />
+      <TransactionDetailModal
+        isOpen={detailModalState.isOpen}
+        onClose={handleCloseDetailModal}
+        transaction={detailModalState.currentTransaction}
+        wasteProducts={wasteProducts}
+      />
 
-        <TransactionFormModal
-          isOpen={formModalState.isOpen}
-          onClose={handleCloseFormModal}
-          initialData={formModalState.currentTransaction}
-          users={users}
-          wasteProducts={wasteProducts}
-          onSubmit={handleSubmitTransaction}
-        />
-      </>
-    );
+      <TransactionFormModal
+        isOpen={formModalState.isOpen}
+        onClose={handleCloseFormModal}
+        initialData={formModalState.currentTransaction}
+        users={users}
+        wasteProducts={wasteProducts}
+        onSubmit={handleSubmitTransaction}
+      />
+    </>
+  );
 };
+
 export default TransactionsManagement;

@@ -1,22 +1,8 @@
 import { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import Paper from "@mui/material/Paper";
 import Sidebar from "../../components/Sidebar";
-import {
-  UserPlusIcon,
-  MagnifyingGlassIcon,
-  PencilSquareIcon,
-  TrashIcon,
-  EyeIcon,
-} from "@heroicons/react/24/solid";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
 import {
   Box,
   Button,
@@ -29,13 +15,11 @@ import {
   Checkbox,
   FormGroup,
   FormControlLabel,
-  IconButton,
   InputAdornment,
   List,
   ListItem,
   ListItemText,
   Divider,
-  Chip,
 } from "@mui/material";
 
 import { db } from "../../firebase";
@@ -50,83 +34,12 @@ import {
   getDoc,
 } from "firebase/firestore";
 import { toast } from "sonner";
-
-const theme = {
-  darkGreen: "#2C514B",
-  green: "#4E7972",
-  lightGreen: "#C2D1C8",
-  orange: "#D66C42",
-  lightGrey: "#ebebeb",
-  white: "#ffffff",
-};
-
-const boxStyle = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: 500,
-  bgcolor: "background.paper",
-  boxShadow: 24,
-  borderRadius: 4,
-  p: 4,
-  maxHeight: "80vh",
-  overflow: "auto",
-};
-
-const notificationSchema = z.object({
-  date: z.string().min(1, { message: "Date is required" }),
-  message: z.string().min(1, { message: "Message is required" }),
-  recipients: z
-    .array(z.string())
-    .min(1, { message: "At least one recipient is required" }),
-});
-
-const NotificationsHeader = ({ onAddClick, searchQuery, setSearchQuery }) => {
-  return (
-    <>
-      <div className="text-2xl font-bold mb-4 text-green-900">Notification</div>
-      <div className="mb-6 flex flex-row gap-4">
-        <Button
-          onClick={onAddClick}
-          sx={{
-            backgroundColor: "#4E7972",
-            borderRadius: 100,
-            width: 280,
-            textTransform: "none",
-          }}
-          startIcon={<UserPlusIcon className="size-5" />}
-          variant="contained"
-        >
-          Add Notification
-        </Button>
-        <Paper elevation="0" sx={{ borderRadius: 100, width: "100%" }}>
-          <TextField
-            fullWidth
-            placeholder="Search by date or message"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <MagnifyingGlassIcon
-                    style={{ color: theme.orange }}
-                    className="size-5 mr-2"
-                  />
-                </InputAdornment>
-              ),
-            }}
-            sx={{
-              "& fieldset": { borderRadius: 100 },
-              input: { "&::placeholder": { color: theme.orange } },
-            }}
-            size="small"
-          />
-        </Paper>
-      </div>
-    </>
-  );
-};
+import ManagementHeader from "../../components/common/ManagementHeader";
+import DeleteConfirmationModal from "../../components/common/DeleteConfirmationModal";
+import { formatDate } from "../../utils/formatDate";
+import ManagementTable from "../../components/common/ManagementTable";
+import { boxStyle, theme } from "../../utils/styles";
+import { notificationSchema } from "../../schemas/NotificationSchema";
 
 const NotificationFormModal = ({
   isOpen,
@@ -136,6 +49,16 @@ const NotificationFormModal = ({
   initialData,
 }) => {
   const [searchText, setSearchText] = useState("");
+
+  const formatDateForInput = (dateValue) => {
+    const dateObj = dateValue?.toDate
+      ? dateValue.toDate()
+      : new Date(dateValue);
+    const year = dateObj.getFullYear();
+    const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+    const day = String(dateObj.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
 
   const {
     control,
@@ -147,7 +70,9 @@ const NotificationFormModal = ({
   } = useForm({
     resolver: zodResolver(notificationSchema),
     defaultValues: {
-      date: initialData?.date || "",
+      date: initialData?.date
+        ? formatDateForInput(initialData.date)
+        : new Date().toISOString().split("T")[0],
       message: initialData?.message || "",
       recipients: initialData?.recipients || [],
     },
@@ -164,7 +89,9 @@ const NotificationFormModal = ({
   useEffect(() => {
     if (isOpen) {
       reset({
-        date: initialData?.date || "",
+        date: initialData?.date
+          ? formatDateForInput(initialData.date)
+          : new Date().toISOString().split("T")[0],
         message: initialData?.message || "",
         recipients: initialData?.recipients || [],
       });
@@ -410,143 +337,6 @@ const RecipientsModal = ({ isOpen, onClose, recipients }) => {
   );
 };
 
-const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm }) => {
-  return (
-    <Modal
-      open={isOpen}
-      onClose={onClose}
-      aria-labelledby="delete-confirmation-title"
-    >
-      <Box sx={boxStyle}>
-        <Typography id="delete-confirmation-title" variant="h6" component="h2">
-          Are you sure you want to delete this notification?
-        </Typography>
-
-        <Button
-          variant="contained"
-          sx={{ mt: 2, mr: 2, backgroundColor: theme.darkGreen }}
-          onClick={onConfirm}
-        >
-          Yes
-        </Button>
-        <Button
-          variant="contained"
-          color="error"
-          sx={{ mt: 2 }}
-          onClick={onClose}
-        >
-          No
-        </Button>
-      </Box>
-    </Modal>
-  );
-};
-
-const NotificationsTable = ({
-  isLoading,
-  notifications,
-  onEdit,
-  onDelete,
-  onViewRecipients,
-}) => {
-  return (
-    <TableContainer
-      elevation="0"
-      sx={{ backgroundColor: "#C2D1C8", height: "80%", borderRadius: "20px" }}
-      component={Paper}
-    >
-      <Table
-        stickyHeader
-        sx={{ minWidth: 650 }}
-        aria-label="notifications table"
-      >
-        <TableHead>
-          <TableRow>
-            <TableCell sx={{ backgroundColor: "#C2D1C8" }}>
-              <b>Date</b>
-            </TableCell>
-            <TableCell sx={{ backgroundColor: "#C2D1C8" }}>
-              <b>Message</b>
-            </TableCell>
-            <TableCell sx={{ backgroundColor: "#C2D1C8" }}>
-              <b>Recipients</b>
-            </TableCell>
-            <TableCell sx={{ backgroundColor: "#C2D1C8" }}></TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {isLoading ? (
-            <TableRow>
-              <TableCell colSpan={4} align="center">
-                Loading...
-              </TableCell>
-            </TableRow>
-          ) : notifications.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={4} align="center">
-                No notifications found
-              </TableCell>
-            </TableRow>
-          ) : (
-            notifications.map((notification) => (
-              <TableRow key={notification.id}>
-                <TableCell>{notification.displayDate}</TableCell>
-                <TableCell>{notification.message}</TableCell>
-                <TableCell>
-                  <Button
-                    onClick={() => onViewRecipients(notification)}
-                    sx={{
-                      backgroundColor: "#4E7972",
-                      borderRadius: 100,
-                      height: 34,
-                      textTransform: "none",
-                      color: "white",
-                      fontSize: "0.75rem",
-                    }}
-                    variant="contained"
-                    startIcon={<EyeIcon className="size-4" />}
-                  >
-                    View {notification.formattedRecipients?.length || 0}{" "}
-                    Recipients
-                  </Button>
-                </TableCell>
-                <TableCell align="right" sx={{ display: "flex", gap: 1 }}>
-                  <Button
-                    onClick={() => onDelete(notification)}
-                    sx={{
-                      backgroundColor: "#4E7972",
-                      borderRadius: 100,
-                      height: 34,
-                      textTransform: "none",
-                    }}
-                    variant="contained"
-                  >
-                    <TrashIcon className="size-5" />
-                    <span className="ms-1.5 mt-0.5">Delete</span>
-                  </Button>
-                  <Button
-                    onClick={() => onEdit(notification)}
-                    sx={{
-                      backgroundColor: "#4E7972",
-                      borderRadius: 100,
-                      height: 34,
-                      textTransform: "none",
-                    }}
-                    variant="contained"
-                  >
-                    <PencilSquareIcon className="size-5" />
-                    <span className="ms-1.5 mt-0.5">Edit</span>
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
-    </TableContainer>
-  );
-};
-
 const NotificationsManagement = () => {
   const [notifications, setNotifications] = useState([]);
   const [users, setUsers] = useState([]);
@@ -617,29 +407,28 @@ const NotificationsManagement = () => {
     try {
       setIsLoading(true);
       const querySnapshot = await getDocs(collection(db, "notifications"));
+      const notificationsData = [];
 
-      const notificationsPromises = querySnapshot.docs.map(
-        async (docSnapshot) => {
-          const notificationData = docSnapshot.data();
+      for (const docSnapshot of querySnapshot.docs) {
+        const notification = {
+          id: docSnapshot.id,
+          ...docSnapshot.data(),
+        };
 
-          const dateObj = notificationData.date?.toDate();
-          const displayDate = dateObj
-            ? dateObj.toLocaleDateString()
-            : "Invalid date";
-
-          const formattedRecipients = await formatRecipients(notificationData);
-
-          return {
-            id: docSnapshot.id,
-            ...notificationData,
-            displayDate,
-            formattedRecipients,
-          };
+        if (notification.date) {
+          notification.date = notification.date.toDate();
+        } else {
+          notification.date = new Date();
         }
-      );
 
-      const processedNotifications = await Promise.all(notificationsPromises);
-      setNotifications(processedNotifications);
+        notification.displayDate = formatDate(notification.date);
+
+        notification.formattedRecipients = await formatRecipients(notification);
+
+        notificationsData.push(notification);
+      }
+
+      setNotifications(notificationsData);
     } catch (error) {
       toast.error("Error fetching notifications");
     } finally {
@@ -787,22 +576,30 @@ const NotificationsManagement = () => {
   return (
     <>
       <div
-        style={{ backgroundColor: "#EBEBEB" }}
-        className="px-8 flex h-screen"
+        style={{ backgroundColor: theme.lightGrey }}
+        className="px-4 md:px-8 flex flex-col md:flex-row h-screen"
       >
         <Sidebar />
-        <div className="w-full py-4 h-screen">
-          <NotificationsHeader
+        <div className="w-full py-4 h-full overflow-auto">
+          <ManagementHeader
+            title="Notifications"
+            buttonLabel="Add Notification"
             onAddClick={handleAddClick}
             searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
+            onSearchChange={setSearchQuery}
           />
-          <NotificationsTable
-            isLoading={isLoading}
-            notifications={filteredNotifications}
-            onEdit={handleEditClick}
-            onDelete={handleDeleteClick}
-            onViewRecipients={handleViewRecipients}
+          <ManagementTable
+            data={filteredNotifications}
+            header={["Date", "Message"]}
+            cell={[(row) => formatDate(row.date), (row) => row.message]}
+            actions={{
+              onView: handleViewRecipients,
+              onEdit: handleEditClick,
+              onDelete: handleDeleteClick,
+            }}
+            loading={isLoading}
+            emptyMessage="No notifications found"
+            containerSx={{ height: "70vh" }}
           />
         </div>
       </div>
