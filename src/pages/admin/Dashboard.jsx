@@ -166,7 +166,7 @@ const Dashboard = () => {
                     value: `${report.total_transactions}`,
                   },
                 ].map((stat, index) => (
-                  <Grid item xs={12} sm={6} md={4} key={index}>
+                  <Grid item xs={12} sm={6} md={6} lg={4} key={index}>
                     <Paper
                       sx={{
                         p: 3,
@@ -175,19 +175,12 @@ const Dashboard = () => {
                         borderRadius: "20px",
                       }}
                     >
-                      <Typography variant="h6" sx={{ color: " #2c514b" }}>
+                      <div className="text-darkgreen text-xl mb-3">
                         {stat.title}
-                      </Typography>
-                      <Typography
-                        variant="h4"
-                        sx={{
-                          mt: 1,
-                          color: " #2c514b",
-                          fontWeight: 600,
-                        }}
-                      >
+                      </div>
+                      <div className="text-darkgreen text-3xl font-bold">
                         {stat.value}
-                      </Typography>
+                      </div>
                     </Paper>
                   </Grid>
                 ))}
