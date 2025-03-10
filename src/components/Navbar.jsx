@@ -56,7 +56,7 @@ const Navbar = () => {
         {/* Left Side: Logo & Tabs */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
           <Box component="img" src={Logo} alt="Logo" sx={{ height: 65 }} />
-          <div className="hidden sm:flex">
+          <div className="hidden md:flex">
             <Box sx={{ display: "flex", gap: 1 }}>
               {navList.map(({ label, path }) => (
                 <Button
@@ -69,7 +69,6 @@ const Navbar = () => {
                         : colors.darkGreen,
                     color: colors.white,
                     borderRadius: "8px 8px 0 0", // Tab-like shape
-                    padding: "8px 16px",
                     fontWeight: "bold",
                     borderBottom:
                       location.pathname === path
@@ -90,7 +89,7 @@ const Navbar = () => {
         {/* Right Side: Logout Button */}
         <div className="space-x-4 flex">
           <NotificationBell />
-          <div className="hidden sm:flex">
+          <div className="hidden md:flex">
             <Button
               onClick={handleLogout}
               sx={{
@@ -107,11 +106,11 @@ const Navbar = () => {
               Logout
             </Button>
           </div>
-          <button onClick={() => setIsMenuOpen((prev) => !prev)} className="sm:hidden"><Bars3Icon className="text-white size-6"/></button>
+          <button onClick={() => setIsMenuOpen((prev) => !prev)} className="md:hidden"><Bars3Icon className="text-white size-6"/></button>
         </div>
       </Toolbar>
     </AppBar>
-    <div className={`${isMenuOpen ? "" : "hidden"} bg-darkgreen border flex border-t-1 flex-col gap-3 border-normalgreen z-10 p-5 top-20`}>
+    <div className={`${isMenuOpen ? "" : "hidden"} bg-darkgreen border md:hidden flex border-t-1 flex-col gap-3 border-normalgreen z-10 p-5 top-20`}>
       {navList.map(({label, path}) => (
       <>
         <button onClick={() => navigate(path)} style={{backgroundColor: location.pathname === path ? `${theme.orange}` : `${theme.darkGreen}` , borderBottom: location.pathname === path ? "" : "1.2px solid white", color: "white", fontWeight: "bold"}} className="p-2.5 text-left rounded-t-lg">

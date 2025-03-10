@@ -14,7 +14,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import {
   ArchiveBoxIcon,
   BellAlertIcon,
-  BellAlertIcon,
   DocumentTextIcon,
   Squares2X2Icon,
   UserGroupIcon,
@@ -54,12 +53,6 @@ const sidebarItem = [
   {
     name: "Transactions",
     icon: <DocumentTextIcon className="size-6 ms-2 text-white" />,
-    path: "/trans",
-  },
-  {
-    name: "Notification",
-    icon: <BellAlertIcon className="size-6 ms-2 text-white" />,
-    path: "/notification",
     path: "/admin/transactions",
   },
   {
