@@ -3,8 +3,6 @@ import { describe, expect, it, vi } from "vitest";
 import Dashboard from "../pages/admin/Dashboard";
 import { BrowserRouter } from "react-router-dom";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
-import { db } from "../firebase";
-import { collection, getDocs } from "firebase/firestore";
 
 // Mock Firebase Firestore
 vi.mock("../firebase", () => ({

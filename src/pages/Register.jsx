@@ -21,6 +21,7 @@ import {
 import { theme } from "../theme";
 import { useNavigate } from "react-router-dom";
 import Logo from "../assets/logo.svg";
+import ReCAPTCHA from "react-google-recaptcha";
 
 const inputStyle = {
   ":hover .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline": {
@@ -37,21 +38,30 @@ const inputStyle = {
   },
 };
 
-const registerSchema = z.object({
-  email: z.string().email("Invalid email format"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  fullname: z.string().min(3, "Full name must be at least 3 characters"),
-  gender: z.enum(["male", "female"], {
-    errorMap: () => ({ message: "Please select a gender" }),
-  }),
-  address: z.string().min(10, "Address must be at least 10 characters"),
-});
+const registerSchema = z
+  .object({
+    email: z.string().email("Invalid email format"),
+    password: z.string().min(6, "Password must be at least 6 characters"),
+    confirmPassword: z
+      .string()
+      .min(6, "Confirm Password must be at least 6 characters"),
+    fullname: z.string().min(3, "Full name must be at least 3 characters"),
+    gender: z.enum(["male", "female"], {
+      errorMap: () => ({ message: "Please select a gender" }),
+    }),
+    address: z.string().min(10, "Address must be at least 10 characters"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"], // This will attach the error to the Confirm Password field
+  });
 
 const Register = () => {
   const { signup } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [recaptchaToken, setRecaptchaToken] = useState("");
 
   const {
     register,
@@ -68,6 +78,11 @@ const Register = () => {
     try {
       setError("");
       setIsLoading(true);
+
+      if (!recaptchaToken) {
+        setError("Please complete the reCAPTCHA verification.");
+        return;
+      }
 
       const userCredential = await signup(data.email, data.password);
       await setDoc(doc(db, "users", userCredential.uid), {
@@ -117,18 +132,30 @@ const Register = () => {
               </Typography>
               <form
                 onSubmit={handleSubmit(handleRegister)}
-                className="space-y-6"
+                className="space-y-4"
               >
-                <div className="grid grid-cols-2 gap-4">
-                  <TextField
-                    sx={inputStyle}
-                    fullWidth
-                    label="Email"
-                    variant="outlined"
-                    {...register("email")}
-                    error={!!errors.email}
-                    helperText={errors.email?.message}
-                  />
+                {/* Full Name & Email - Full Width */}
+                <TextField
+                  sx={inputStyle}
+                  fullWidth
+                  label="Full Name"
+                  variant="outlined"
+                  {...register("fullname")}
+                  error={!!errors.fullname}
+                  helperText={errors.fullname?.message}
+                />
+                <TextField
+                  sx={inputStyle}
+                  fullWidth
+                  label="Email"
+                  variant="outlined"
+                  {...register("email")}
+                  error={!!errors.email}
+                  helperText={errors.email?.message}
+                />
+
+                {/* Password & Confirm Password - Side by Side */}
+                <div className="grid grid-cols-2 gap-3">
                   <TextField
                     sx={inputStyle}
                     fullWidth
@@ -142,28 +169,33 @@ const Register = () => {
                   <TextField
                     sx={inputStyle}
                     fullWidth
-                    label="Full Name"
+                    label="Confirm Password"
+                    type="password"
                     variant="outlined"
-                    {...register("fullname")}
-                    error={!!errors.fullname}
-                    helperText={errors.fullname?.message}
+                    {...register("confirmPassword")}
+                    error={!!errors.confirmPassword}
+                    helperText={errors.confirmPassword?.message}
                   />
-                  <FormControl
-                    fullWidth
-                    error={!!errors.gender}
-                    variant="outlined"
-                    sx={inputStyle}
-                  >
-                    <InputLabel id="gender-label">Gender</InputLabel>
-                    <Select labelId="gender-label" {...register("gender")}>
-                      <MenuItem value="male">Male</MenuItem>
-                      <MenuItem value="female">Female</MenuItem>
-                    </Select>
-                    {errors.gender && (
-                      <FormHelperText>{errors.gender.message}</FormHelperText>
-                    )}
-                  </FormControl>
                 </div>
+
+                {/* Gender - Below Password Fields */}
+                <FormControl
+                  fullWidth
+                  error={!!errors.gender}
+                  variant="outlined"
+                  sx={inputStyle}
+                >
+                  <InputLabel id="gender-label">Gender</InputLabel>
+                  <Select labelId="gender-label" {...register("gender")}>
+                    <MenuItem value="male">Male</MenuItem>
+                    <MenuItem value="female">Female</MenuItem>
+                  </Select>
+                  {errors.gender && (
+                    <FormHelperText>{errors.gender.message}</FormHelperText>
+                  )}
+                </FormControl>
+
+                {/* Address - Full Width */}
                 <TextField
                   sx={inputStyle}
                   fullWidth
@@ -173,6 +205,18 @@ const Register = () => {
                   error={!!errors.address}
                   helperText={errors.address?.message}
                 />
+
+                <ReCAPTCHA
+                  sitekey="6Lf6rO8qAAAAAMlXW_2zlOn2NuAVJL-528tIsTGU" // Replace with your actual site key
+                  onChange={(token) => setRecaptchaToken(token)}
+                  onExpired={() => setRecaptchaToken("")} // Reset on expiration
+                />
+                {!recaptchaToken && (
+                  <Typography color="error" className="text-sm">
+                    Please complete the reCAPTCHA
+                  </Typography>
+                )}
+
                 <Button
                   size="large"
                   sx={{ backgroundColor: theme.green }}
