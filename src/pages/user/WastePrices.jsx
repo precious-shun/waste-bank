@@ -108,7 +108,7 @@ const WastePrices = () => {
                   onClick={() => setIsCartOpen(!isCartOpen)}
                 >
                   <Typography variant="h6" className="text-gray-800">
-                    Stash
+                    Stash Simulation
                   </Typography>
                 </div>
 
