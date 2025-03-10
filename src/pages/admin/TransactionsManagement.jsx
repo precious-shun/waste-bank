@@ -674,7 +674,6 @@ const TransactionsManagement = () => {
         <div className="w-full py-4 h-full overflow-auto">
           <ManagementHeader
             title="Transaction"
-            buttonLabel="Add Transaction"
             onAddClick={handleAddClick}
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}

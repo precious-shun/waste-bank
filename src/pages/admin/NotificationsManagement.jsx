@@ -583,7 +583,6 @@ const NotificationsManagement = () => {
         <div className="w-full py-4 h-full overflow-auto">
           <ManagementHeader
             title="Notifications"
-            buttonLabel="Add Notification"
             onAddClick={handleAddClick}
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
