@@ -138,7 +138,6 @@ const Register = () => {
                 onSubmit={handleSubmit(handleRegister)}
                 className="space-y-4"
               >
-                {/* Full Name & Email - Full Width */}
                 <TextField
                   sx={inputStyle}
                   fullWidth
@@ -158,7 +157,6 @@ const Register = () => {
                   helperText={errors.email?.message}
                 />
 
-                {/* Password & Confirm Password - Side by Side */}
                 <div className="grid grid-cols-2 gap-3">
                   <TextField
                     sx={inputStyle}
